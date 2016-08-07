@@ -1,6 +1,6 @@
 <?php
 
-namespace Michaelc/Voting/STV;
+namespace Michaelc\Voting\STV;
 
 class Election
 {

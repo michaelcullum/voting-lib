@@ -1,6 +1,6 @@
 <?php
 
-namespace Michaelc/Voting/STV;
+namespace Michaelc\Voting\STV;
 
 class Candidate
 {
@@ -8,6 +8,7 @@ class Candidate
   	const RUNNING = 2;
   	const DEFEATED = 3;
 
+  	protected $id;
 	protected $votes;
 	protected $surplus;
 	protected $state;
