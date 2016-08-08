@@ -5,21 +5,21 @@ namespace Michaelc\Voting\STV;
 class Candidate
 {
     const ELECTED = 1;
-        const RUNNING = 2;
-        const DEFEATED = 3;
+    const RUNNING = 2;
+    const DEFEATED = 3;
 
-        /**
-         * Identifier for the candidate
-         *
-         * @var integer
-         */
-        protected $id;
+    /**
+     * Identifier for the candidate
+     *
+     * @var integer
+     */
+    protected $id;
 
-        /**
-         * Number of votes the candidate currently has
-         *
-         * @var float
-         */
+    /**
+     * Number of votes the candidate currently has
+     *
+     * @var float
+     */
     protected $votes;
 
     /**
