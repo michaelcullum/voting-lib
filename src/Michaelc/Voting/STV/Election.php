@@ -129,4 +129,14 @@ class Election
     {
         return $this->ballots;
     }
+
+    /**
+     * Get the number of ballots
+     *
+     * @return int
+     */
+    public function getNumBallots(): int
+    {
+        return count($this->ballots);
+    }
 }

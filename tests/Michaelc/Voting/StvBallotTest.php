@@ -12,6 +12,6 @@ class StvBallotTest extends \PHPUnit_Framework_TestCase
 		$ballot = new Ballot($ranking);
 		$this->assertEquals($ballot->getRanking(), $ranking);
 		$this->assertEquals($ballot->getWeight(), 1.0);
-		$this->assertEquals($ballot->getLevelUsed(), 0);
+		$this->assertEquals($ballot->getLevelUsed(), -1);
 	}
 }

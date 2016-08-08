@@ -26,5 +26,29 @@ class StvElectionTest extends \PHPUnit_Framework_TestCase
 		$this->assertEquals($candidateCount, $election->getCandidateCount());
 		$this->assertEquals($candidateCount, $election->getActiveCandidateCount());
 		$this->assertEquals($winners, $election->getWinnersCount());
+		$this->assertEquals(2, $election->getNumBallots());
+	}
+
+	public function testElectionRunner()
+	{
+		$election = $this->getSampleElection();
+		$runner = new \MichaelC\Voting\STV\VoteHandler($election);
+	}
+
+	protected function getSampleElection()
+	{
+		$candidates = $ballots = [];
+
+		for ($i=1; $i <= 20; $i++) {
+			$candidates[$i] = new Candidate($i);
+		}
+
+		for ($i=0; $i <= 40; $i++) {
+			$ballots[] = new Ballot([random_int(1,20), random_int(1,20), random_int(1,20)]);
+		}
+
+		$election = new Election(12, $candidates, $ballots);
+
+		return $election;
 	}
 }

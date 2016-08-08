@@ -2,6 +2,8 @@
 
 namespace Michaelc\Voting\STV;
 
+use Michaelc\Voting\STV\Candidate;
+
 class Ballot
 {
     /**
@@ -35,7 +37,7 @@ class Ballot
     {
         $this->weight = 1.0;
         $this->ranking = $ranking;
-        $this->levelUsed = 0;
+        $this->levelUsed = -1;
     }
 
     /**
@@ -108,5 +110,34 @@ class Ballot
         $this->levelUsed = $levelUsed;
 
         return $this;
+    }
+
+    public function getLastChoice()
+    {
+        $level = $levelUsed;
+
+        if (empty($this->ranking[$level]))
+        {
+          return null;
+        }
+
+        return $this->ranking[$level];
+    }
+
+    public function getNextChoice()
+    {
+        $level = $levelUsed + 1;
+
+        if (empty($this->ranking[$level]))
+        {
+          return null;
+        }
+
+        return $this->ranking[$level];
+    }
+
+    public function getNextChoiceWorth(): float
+    {
+        return 0.0;
     }
 }

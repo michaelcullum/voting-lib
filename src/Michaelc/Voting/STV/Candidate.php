@@ -23,13 +23,6 @@ class Candidate
     protected $votes;
 
     /**
-     * Number of surplus votes the candidate has to be re-allocated
-     *
-     * @var float
-     */
-    protected $surplus;
-
-    /**
      * State of the candidate (use class constants)
      *
      * @var integer
@@ -43,7 +36,6 @@ class Candidate
     {
         $this->id = $id;
         $this->votes = 0.0;
-        $this->surplus = 0.0;
         $this->state = self::RUNNING;
     }
 
@@ -68,39 +60,15 @@ class Candidate
     }
 
     /**
-     * Sets the Number of votes the candidate currently has.
+     * Adds votes to a candidate
      *
-     * @param float $votes the votes
-     *
-     * @return self
-     */
-    public function setVotes(float $votes)
-    {
-        $this->votes = $votes;
-
-        return $this;
-    }
-
-    /**
-     * Gets the Number of surplus votes the candidate has to be re-allocated.
-     *
-     * @return float
-     */
-    public function getSurplus(): float
-    {
-        return $this->surplus;
-    }
-
-    /**
-     * Sets the Number of surplus votes the candidate has to be re-allocated.
-     *
-     * @param float $surplus the surplus
+     * @param float $votes Number of votes to add
      *
      * @return self
      */
-    public function setSurplus(float $surplus)
+    public function addVotes(float $votes)
     {
-        $this->surplus = $surplus;
+        $this->votes += $votes;
 
         return $this;
     }
