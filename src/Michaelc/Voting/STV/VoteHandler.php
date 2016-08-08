@@ -100,6 +100,10 @@ class VoteHandler
 	 */
 	public function getQuota(): int
 	{
-		return floor(($election->getNumBallots() / ($election->getNumSeats() + 1)) + 1);
+		return floor(
+			($this->election->getNumBallots() /
+				($this->election->getWinnersCount() + 1)
+			)
+			+ 1);
 	}
 }
