@@ -4,38 +4,38 @@ namespace Michaelc\Voting\STV;
 
 class Ballot
 {
-	/**
-	 * Ranking of candidates ids
-	 *
-	 * @var array
-	 */
-	protected $ranking;
+    /**
+     * Ranking of candidates ids
+     *
+     * @var array
+     */
+    protected $ranking;
 
-	/**
-	 * The current weighting or value of this person's vote
-	 *
-	 * @var float
-	 */
-	protected $weight;
+    /**
+     * The current weighting or value of this person's vote
+     *
+     * @var float
+     */
+    protected $weight;
 
-	/**
-	 * The current preference in use from this ballot
-	 *
-	 * @var integer
-	 */
-	protected $levelUsed;
+    /**
+     * The current preference in use from this ballot
+     *
+     * @var integer
+     */
+    protected $levelUsed;
 
-	/**
-	 * Constructor
-	 *
-	 * @param array $ranking The ranking of candidates Key being ranking,
-	 *                       value being a candidate id
-	 */
-	public function __construct(array $ranking)
-	{
-	    $this->weight = 1.0;
-	    $this->ranking = $ranking;
-	    $this->levelUsed = 0;
+    /**
+     * Constructor
+     *
+     * @param array $ranking The ranking of candidates Key being ranking,
+     *                       value being a candidate id
+     */
+    public function __construct(array $ranking)
+    {
+        $this->weight = 1.0;
+        $this->ranking = $ranking;
+        $this->levelUsed = 0;
     }
 
     /**

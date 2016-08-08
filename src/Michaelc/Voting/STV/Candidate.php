@@ -4,48 +4,48 @@ namespace Michaelc\Voting\STV;
 
 class Candidate
 {
-	const ELECTED = 1;
-  	const RUNNING = 2;
-  	const DEFEATED = 3;
+    const ELECTED = 1;
+        const RUNNING = 2;
+        const DEFEATED = 3;
 
-  	/**
-  	 * Identifier for the candidate
-  	 *
-  	 * @var integer
-  	 */
-  	protected $id;
+        /**
+         * Identifier for the candidate
+         *
+         * @var integer
+         */
+        protected $id;
 
-  	/**
-  	 * Number of votes the candidate currently has
-  	 *
-  	 * @var float
-  	 */
-	protected $votes;
+        /**
+         * Number of votes the candidate currently has
+         *
+         * @var float
+         */
+    protected $votes;
 
-	/**
-	 * Number of surplus votes the candidate has to be re-allocated
-	 *
-	 * @var float
-	 */
-	protected $surplus;
+    /**
+     * Number of surplus votes the candidate has to be re-allocated
+     *
+     * @var float
+     */
+    protected $surplus;
 
-	/**
-	 * State of the candidate (use class constants)
-	 *
-	 * @var integer
-	 */
-	protected $state;
+    /**
+     * State of the candidate (use class constants)
+     *
+     * @var integer
+     */
+    protected $state;
 
-	/**
-	 * Constructor
-	 */
-	public function __construct(int $id)
-	{
-		$this->id = $id;
-		$this->votes = 0.0;
-		$this->surplus = 0.0;
-		$this->state = self::RUNNING;
-	}
+    /**
+     * Constructor
+     */
+    public function __construct(int $id)
+    {
+        $this->id = $id;
+        $this->votes = 0.0;
+        $this->surplus = 0.0;
+        $this->state = self::RUNNING;
+    }
 
     /**
      * Gets the Identifier for the candidate.
