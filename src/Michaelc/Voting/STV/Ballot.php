@@ -55,7 +55,7 @@ class Ballot
      *
      * @return self
      */
-    protected function setRanking(array $ranking)
+    public function setRanking(array $ranking)
     {
         $this->ranking = $ranking;
 
@@ -79,7 +79,7 @@ class Ballot
      *
      * @return self
      */
-    protected function setWeight(float $weight)
+    public function setWeight(float $weight)
     {
         $this->weight = $weight;
 
@@ -103,7 +103,7 @@ class Ballot
      *
      * @return self
      */
-    protected function setLevelUsed(int $levelUsed)
+    public function setLevelUsed(int $levelUsed)
     {
         $this->levelUsed = $levelUsed;
 

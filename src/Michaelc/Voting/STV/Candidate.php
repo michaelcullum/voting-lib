@@ -74,7 +74,7 @@ class Candidate
      *
      * @return self
      */
-    protected function setVotes(float $votes)
+    public function setVotes(float $votes)
     {
         $this->votes = $votes;
 
@@ -98,7 +98,7 @@ class Candidate
      *
      * @return self
      */
-    protected function setSurplus(float $surplus)
+    public function setSurplus(float $surplus)
     {
         $this->surplus = $surplus;
 
@@ -122,7 +122,7 @@ class Candidate
      *
      * @return self
      */
-    protected function setState(int $state)
+    public function setState(int $state)
     {
         $this->state = $state;
 
