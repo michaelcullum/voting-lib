@@ -12,17 +12,13 @@ class StvElectionTest extends \PHPUnit_Framework_TestCase
 		$candidateCount = 6;
 
 		$candidates = $ballots = [];
-		$candidates[1] = new Candidate(1);
-		$candidates[2] = new Candidate(2);
-		$candidates[3] = new Candidate(3);
-		$candidates[4] = new Candidate(4);
-		$candidates[5] = new Candidate(5);
-		$candidates[6] = new Candidate(6);
+
+		for ($i=1; $i <= $candidateCount; $i++) {
+			$candidates[$i] = new Candidate($i);
+		}
 
 		$ballots[] = new Ballot([4, 5, 6]);
 		$ballots[] = new Ballot([1, 2, 3]);
-		$ballots[] = new Ballot([4, 5, 6]);
-		$ballots[] = new Ballot([1, 4, 2]);
 
 		$election = new Election($winners, $candidates, $ballots);
 
