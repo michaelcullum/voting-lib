@@ -2,7 +2,7 @@
 
 namespace Tests\Michaelc\Voting;
 
-use Michaelc\Voting\STV\{Election, Candidate, Ballot};
+use Michaelc\Voting\STV\{Election, Candidate, Ballot, VoteHandler};
 
 class StvElectionTest extends \PHPUnit_Framework_TestCase
 {
@@ -32,7 +32,7 @@ class StvElectionTest extends \PHPUnit_Framework_TestCase
 	public function testElectionRunner()
 	{
 		$election = $this->getSampleElection();
-		$runner = new \MichaelC\Voting\STV\VoteHandler($election);
+		$runner = new VoteHandler($election);
 	}
 
 	protected function getSampleElection()
