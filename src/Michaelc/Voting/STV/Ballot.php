@@ -2,8 +2,6 @@
 
 namespace Michaelc\Voting\STV;
 
-use Michaelc\Voting\STV\Candidate;
-
 class Ballot
 {
     /**
@@ -30,7 +28,7 @@ class Ballot
     /**
      * Constructor
      *
-     * @param array $ranking The ranking of candidates Key being ranking,
+     * @param integer[] $ranking The ranking of candidates Key being ranking,
      *                       value being a candidate id
      */
     public function __construct(array $ranking)
@@ -118,7 +116,7 @@ class Ballot
 
         if (empty($this->ranking[$level]))
         {
-          return null;
+            return null;
         }
 
         return $this->ranking[$level];
@@ -130,7 +128,7 @@ class Ballot
 
         if (empty($this->ranking[$level]))
         {
-          return null;
+            return null;
         }
 
         return $this->ranking[$level];
