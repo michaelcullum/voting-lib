@@ -86,7 +86,7 @@ class VoteHandler
     	}
 
 		$candidate->setState(Candidate::ELECTED);
-		$surplus = $candidate->getVotes() - $quota;
+		$surplus = $candidate->getVotes() - $this->quota;
 
 		$this->transferVotes($surplus, $candidate);
 

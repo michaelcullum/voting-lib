@@ -9,7 +9,7 @@ class Ballot
     /**
      * Ranking of candidates ids
      *
-     * @var array
+     * @var integer[]
      */
     protected $ranking;
 
