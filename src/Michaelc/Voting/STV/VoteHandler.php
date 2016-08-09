@@ -60,7 +60,7 @@ class VoteHandler
     /**
      * @param Ballot $ballot
      */
-    protected function allocateVotes(&$ballot): Ballot
+    protected function allocateVotes(Ballot &$ballot): Ballot
     {
         $weight = $ballot->getWeight();
         $candidate = $ballot->getNextPreference();
