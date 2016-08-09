@@ -57,6 +57,9 @@ class VoteHandler
         }
     }
 
+    /**
+     * @param Ballot $ballot
+     */
     protected function allocateVotes(&$ballot): Ballot
     {
         $weight = $ballot->getWeight();
