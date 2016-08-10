@@ -58,14 +58,17 @@ class VoteHandler
     }
 
     /**
-     * @param Ballot $ballot
+     * Allocate the next vote from a Ballot
+     *
+     * @param Ballot $ballot 	The ballot to allocate the votes from
+     * @return Ballot 			The same ballot passed in modified
      */
     protected function allocateVotes(Ballot &$ballot): Ballot
     {
         $weight = $ballot->getWeight();
-        $candidate = $ballot->getNextPreference();
+        $candidate = $ballot->getNextChoice();
         $this->election->getCandidate($candidate->getId())->addVotes($weight);
-        $ballot->setLastUsedLevel(($step - 1));
+        $ballot->setLevelUsed(($step - 1));
 
         return $ballot;
     }
