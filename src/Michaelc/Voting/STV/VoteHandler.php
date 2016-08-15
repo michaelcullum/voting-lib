@@ -28,6 +28,13 @@ class VoteHandler
     protected $quota;
 
     /**
+     * Number of candidates elected so far
+     *
+     * @var int
+     */
+    protected $electedCandidates;
+
+    /**
      * Constructor
      *
      * @param Election $election
@@ -39,26 +46,65 @@ class VoteHandler
         $this->quota = $this->getQuota();
     }
 
-    public function step($step)
+    /**
+     * Run the election
+     *
+     * @return \MichaelC\Voting\STV\Candidate[]	Winning candidates
+     */
+    public function run()
+    {
+    	$this->firstStep();
+
+        $candidates = $this->election->getActiveCandidates();
+
+        while ($electedCandidates < $this->election->getWinners())
+        {
+	    	if (!$this->checkCandidates($candidates))
+	    	{
+	    		$this->eliminateCandidates($candidates);
+	    	}
+        }
+
+        return $this->election->getElectedCandidates();
+    }
+
+    /**
+     * Perform the initial vote allocation
+     *
+     * @return
+     */
+    public function firstStep()
     {
         foreach ($this->ballots as $i => $ballot)
         {
             $this->allocateVotes($ballot);
         }
 
-        $candidates = $election->getActiveCandidates();
+        return;
+    }
 
-        foreach ($candidates as $i => $candidate)
+    /**
+     * Check if any candidates have reached the quota and can be elected
+     *
+     * @param  array  $candidates 	Array of active candidates to check
+     * @return bool 				Whether any candidates were changed to elected
+     */
+    protected function checkCandidates(array &$candidates): bool
+    {
+    	foreach ($candidates as $i => $candidate)
         {
             if ($candidate->getVotes() >= $this->quota)
             {
                 $this->electCandidate($candidate);
+                $elected = true;
             }
         }
+
+        return $elected ?? false;
     }
 
     /**
-     * Allocate the next vote from a Ballot
+     * Allocate the next votes from a Ballot
      *
      * @param Ballot $ballot 	The ballot to allocate the votes from
      * @return Ballot 			The same ballot passed in modified
@@ -73,6 +119,13 @@ class VoteHandler
         return $ballot;
     }
 
+    /**
+     * Transfer the votes from one candidate to other candidates
+     *
+     * @param  float     $votes     [description]
+     * @param  Candidate $candidate [description]
+     * @return [type]               [description]
+     */
     protected function transferVotes(float $votes, Candidate $candidate)
     {
         return;
@@ -92,11 +145,49 @@ class VoteHandler
         }
 
         $candidate->setState(Candidate::ELECTED);
-        $surplus = $candidate->getVotes() - $this->quota;
+        $this->electedCandidates++;
 
-        $this->transferVotes($surplus, $candidate);
+        if ($this->electedCandidates < $this->election->getWinnersCount())
+        {
+        	$surplus = $candidate->getVotes() - $this->quota;
+        	$this->transferVotes($surplus, $candidate);
+        }
 
         return;
+    }
+
+    /**
+     * Eliminate the candidate(s) with the lowest number of votes
+     * and reallocated their votes
+     *
+     * @param  array  $candidates 	Array of active candidates
+     * @return int 					Number of candidates eliminated
+     */
+    protected function eliminateCandidates(array &$candidates): int
+    {
+    	$minimum = 0;
+
+    	foreach ($candidates as $i => $candidate)
+        {
+            if ($candidate->getVotes() > $minimum)
+            {
+                $minimum = $candidate->getVotes();
+                unset($minimumCandidates);
+                $minimumCandidates[] = $candidate;
+            }
+            elseif ($candidate->getVotes() == $minimum)
+            {
+                $minimumCandidates[] = $candidate;
+            }
+        }
+
+        foreach($minimumCandidates as $minimumCandidate)
+        {
+        	$this->transferVotes($minimumCandidate);
+        	$minimumCandidate->setState(Candidate::DEFEATED);
+        }
+
+        return count($minimumCandidates);
     }
 
     /**

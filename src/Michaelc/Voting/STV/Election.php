@@ -77,17 +77,38 @@ class Election
      */
     public function getActiveCandidates(): array
     {
-        $activeCandidates = [];
+        return $this->getStateCandidates(Candidate::RUNNING);
+    }
+
+    /**
+     * Get an array of candidates elected
+     *
+     * @return \Michaelc\Voting\STV\Candidate[]
+     */
+    public function getElectedCandidates(): array
+    {
+        return $this->getStateCandidates(Candidate::ELECTED);
+    }
+
+    /**
+     * Get all candidates of a specific state
+     *
+     * @param  int    $state A candidate state (See Candidate constants)
+     * @return \Michaelc\Voting\STV\Candidate[]
+     */
+    public function getStateCandidates(int $state): array
+    {
+        $candidates = [];
 
         foreach ($this->candidates as $candidateId => $candidate)
         {
-            if ($candidate->getState() == Candidate::RUNNING)
+            if ($candidate->getState() == $state)
             {
-                $activeCandidates[$candidateId] = $candidate;
+                $candidates[$candidateId] = $candidate;
             }
         }
 
-        return $activeCandidates;
+        return $candidates;
     }
 
     /**
