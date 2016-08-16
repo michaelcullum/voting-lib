@@ -2,9 +2,9 @@
 
 namespace Tests\Michaelc\Voting;
 
-use Michaelc\Voting\STV\Election;
-use Michaelc\Voting\STV\Candidate;
 use Michaelc\Voting\STV\Ballot;
+use Michaelc\Voting\STV\Candidate;
+use Michaelc\Voting\STV\Election;
 use Michaelc\Voting\STV\VoteHandler;
 use Psr\Log\LoggerInterface as Logger;
 
