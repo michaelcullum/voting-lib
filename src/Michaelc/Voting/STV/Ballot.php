@@ -110,7 +110,7 @@ class Ballot
 
     public function getLastChoice()
     {
-        $level = $levelUsed;
+        $level = $this->levelUsed;
 
         if (empty($this->ranking[$level]))
         {
@@ -122,7 +122,7 @@ class Ballot
 
     public function getNextChoice()
     {
-        $level = $levelUsed + 1;
+        $level = $this->levelUsed + 1;
 
         if (empty($this->ranking[$level]))
         {

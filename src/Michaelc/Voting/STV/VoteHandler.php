@@ -215,6 +215,7 @@ class VoteHandler
     protected function eliminateCandidates(array &$candidates): int
     {
     	$minimum = 0;
+        $minimumCandidates = [];
 
     	foreach ($candidates as $i => $candidate)
         {
@@ -230,7 +231,7 @@ class VoteHandler
             }
         }
 
-        foreach($minimumCandidates as $minimumCandidate)
+        foreach ($minimumCandidates as $minimumCandidate)
         {
         	$this->transferEliminatedVotes($minimumCandidate);
         	$minimumCandidate->setState(Candidate::DEFEATED);
