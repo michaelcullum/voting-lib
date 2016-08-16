@@ -61,16 +61,16 @@ class VoteHandler
     {
         $this->rejectInvalidBallots();
 
-    	$this->firstStep();
+        $this->firstStep();
 
         $candidates = $this->election->getActiveCandidates();
 
         while ($this->electedCandidates < $this->election->getWinnersCount())
         {
-	    	if (!$this->checkCandidates($candidates))
-	    	{
-	    		$this->eliminateCandidates($candidates);
-	    	}
+            if (!$this->checkCandidates($candidates))
+            {
+                $this->eliminateCandidates($candidates);
+            }
         }
 
         return $this->election->getElectedCandidates();
@@ -99,7 +99,7 @@ class VoteHandler
      */
     protected function checkCandidates(array &$candidates): bool
     {
-    	foreach ($candidates as $i => $candidate)
+        foreach ($candidates as $i => $candidate)
         {
             if ($candidate->getVotes() >= $this->quota)
             {
@@ -127,8 +127,8 @@ class VoteHandler
 
         if ($candidate !== null)
         {
-	        $this->election->getCandidate($candidate)->addVotes($weight);
-	        $ballot->incrementLevelUsed();
+            $this->election->getCandidate($candidate)->addVotes($weight);
+            $ballot->incrementLevelUsed();
         }
 
         return $ballot;
@@ -198,8 +198,8 @@ class VoteHandler
 
         if ($this->electedCandidates < $this->election->getWinnersCount())
         {
-        	$surplus = $candidate->getVotes() - $this->quota;
-        	$this->transferSurplusVotes($surplus, $candidate);
+            $surplus = $candidate->getVotes() - $this->quota;
+            $this->transferSurplusVotes($surplus, $candidate);
         }
 
         return;
@@ -214,10 +214,10 @@ class VoteHandler
      */
     protected function eliminateCandidates(array &$candidates): int
     {
-    	$minimum = 0;
+        $minimum = 0;
         $minimumCandidates = [];
 
-    	foreach ($candidates as $i => $candidate)
+        foreach ($candidates as $i => $candidate)
         {
             if ($candidate->getVotes() > $minimum)
             {
@@ -233,8 +233,8 @@ class VoteHandler
 
         foreach ($minimumCandidates as $minimumCandidate)
         {
-        	$this->transferEliminatedVotes($minimumCandidate);
-        	$minimumCandidate->setState(Candidate::DEFEATED);
+            $this->transferEliminatedVotes($minimumCandidate);
+            $minimumCandidate->setState(Candidate::DEFEATED);
         }
 
         return count($minimumCandidates);
