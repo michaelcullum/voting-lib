@@ -199,7 +199,7 @@ class VoteHandler
         if ($this->electedCandidates < $this->election->getWinnersCount())
         {
         	$surplus = $candidate->getVotes() - $this->quota;
-        	$this->transferVotes($surplus, $candidate);
+        	$this->transferSurplusVotes($surplus, $candidate);
         }
 
         return;
