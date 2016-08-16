@@ -9,28 +9,28 @@ class Candidate
     const DEFEATED = 3;
 
     /**
-     * Identifier for the candidate
+     * Identifier for the candidate.
      *
      * @var int
      */
     protected $id;
 
     /**
-     * Number of votes the candidate currently has
+     * Number of votes the candidate currently has.
      *
      * @var float
      */
     protected $votes;
 
     /**
-     * State of the candidate (use class constants)
+     * State of the candidate (use class constants).
      *
      * @var int
      */
     protected $state;
 
     /**
-     * Constructor
+     * Constructor.
      */
     public function __construct(int $id)
     {
@@ -60,7 +60,7 @@ class Candidate
     }
 
     /**
-     * Adds votes to a candidate
+     * Adds votes to a candidate.
      *
      * @param float $votes Number of votes to add
      *

@@ -2,40 +2,38 @@
 
 namespace Michaelc\Voting\STV;
 
-use Michaelc\Voting\STV\Candidate;
-
 class Election
 {
     /**
-     * Count of candidates in election
+     * Count of candidates in election.
      *
      * @var int
      */
     protected $candidateCount;
 
     /**
-     * Count of number of seats/winners
+     * Count of number of seats/winners.
      *
      * @var int
      */
     protected $winnersCount;
 
     /**
-     * Array of candidates competing in election
+     * Array of candidates competing in election.
      *
      * @var array
      */
     protected $candidates;
 
     /**
-     * Array of ballots cast in election
+     * Array of ballots cast in election.
      *
      * @var array
      */
     protected $ballots;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param int   $winnersCount Number of winners to allocate
      * @param array $candidates   Array of candidates competing
@@ -50,9 +48,10 @@ class Election
     }
 
     /**
-     * Get a specific candidate object by their ID
+     * Get a specific candidate object by their ID.
      *
-     * @param  int    $id    ID of the candidate to get
+     * @param int $id ID of the candidate to get
+     *
      * @return \Michaelc\Voting\STV\Candidate
      */
     public function getCandidate(int $id): Candidate
@@ -61,7 +60,7 @@ class Election
     }
 
     /**
-     * Get a count of candidates competing
+     * Get a count of candidates competing.
      *
      * @return int
      */
@@ -71,7 +70,7 @@ class Election
     }
 
     /**
-     * Get an array of candidates still running (not elected or defeated)
+     * Get an array of candidates still running (not elected or defeated).
      *
      * @return \Michaelc\Voting\STV\Candidate[]
      */
@@ -81,7 +80,7 @@ class Election
     }
 
     /**
-     * Get an array of candidates elected
+     * Get an array of candidates elected.
      *
      * @return \Michaelc\Voting\STV\Candidate[]
      */
@@ -91,7 +90,7 @@ class Election
     }
 
     /**
-     * Get an array of candidates defeated
+     * Get an array of candidates defeated.
      *
      * @return \Michaelc\Voting\STV\Candidate[]
      */
@@ -101,19 +100,18 @@ class Election
     }
 
     /**
-     * Get all candidates of a specific state
+     * Get all candidates of a specific state.
      *
-     * @param  int    $state A candidate state (See Candidate constants)
+     * @param int $state A candidate state (See Candidate constants)
+     *
      * @return \Michaelc\Voting\STV\Candidate[]
      */
     public function getStateCandidates(int $state): array
     {
         $candidates = [];
 
-        foreach ($this->candidates as $candidateId => $candidate)
-        {
-            if ($candidate->getState() == $state)
-            {
+        foreach ($this->candidates as $candidateId => $candidate) {
+            if ($candidate->getState() == $state) {
                 $candidates[$candidateId] = $candidate;
             }
         }
@@ -122,7 +120,7 @@ class Election
     }
 
     /**
-     * Get a count of candidates still running (not elected or defeated)
+     * Get a count of candidates still running (not elected or defeated).
      *
      * @return int
      */
@@ -132,7 +130,7 @@ class Election
     }
 
     /**
-     * Get an array of candidate ids
+     * Get an array of candidate ids.
      *
      * @return int[]
      */
@@ -140,8 +138,7 @@ class Election
     {
         $candidateIds = [];
 
-        foreach ($this->candidates as $i => $candidate)
-        {
+        foreach ($this->candidates as $i => $candidate) {
             $candidateIds[] = $candidate->getId();
         }
 
@@ -179,7 +176,7 @@ class Election
     }
 
     /**
-     * Get the number of ballots
+     * Get the number of ballots.
      *
      * @return int
      */
@@ -189,7 +186,7 @@ class Election
     }
 
     /**
-     * Get status of all candidates
+     * Get status of all candidates.
      *
      * @return array
      */
@@ -197,18 +194,15 @@ class Election
     {
         $candidates = [];
 
-        foreach ($this->getElectedCandidates() as $i => $candidate)
-        {
+        foreach ($this->getElectedCandidates() as $i => $candidate) {
             $candidates['elected'][] = $candidate->getId();
         }
 
-        foreach ($this->getActiveCandidates() as $i => $candidate)
-        {
+        foreach ($this->getActiveCandidates() as $i => $candidate) {
             $candidates['active'][] = [$candidate->getId(), $candidate->getVotes()];
         }
 
-        foreach ($this->getDefeatedCandidates() as $i => $candidate)
-        {
+        foreach ($this->getDefeatedCandidates() as $i => $candidate) {
             $candidates['defeated'][] = $candidate->getId();
         }
 

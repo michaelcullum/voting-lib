@@ -5,28 +5,28 @@ namespace Michaelc\Voting\STV;
 class Ballot
 {
     /**
-     * Ranking of candidates ids
+     * Ranking of candidates ids.
      *
      * @var int[]
      */
     protected $ranking;
 
     /**
-     * The current weighting or value of this person's vote
+     * The current weighting or value of this person's vote.
      *
      * @var float
      */
     protected $weight;
 
     /**
-     * The current preference in use from this ballot
+     * The current preference in use from this ballot.
      *
      * @var int
      */
     protected $levelUsed;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param int[] $ranking The ranking of candidates Key being ranking,
      *                       value being a candidate id. Zero-indexed (Key
@@ -76,8 +76,9 @@ class Ballot
     /**
      * Sets the The current weighting or value of this person's vote.
      *
-     * @param  float    $weight    The weight
-     * @return float    $weight    The inputted weight
+     * @param float $weight The weight
+     *
+     * @return float $weight    The inputted weight
      */
     public function setWeight(float $weight): float
     {
@@ -103,7 +104,7 @@ class Ballot
      */
     public function incrementLevelUsed(): int
     {
-        $this->levelUsed++;
+        ++$this->levelUsed;
 
         return $this->levelUsed;
     }
@@ -112,9 +113,8 @@ class Ballot
     {
         $level = $this->levelUsed;
 
-        if (empty($this->ranking[$level]))
-        {
-            return null;
+        if (empty($this->ranking[$level])) {
+            return;
         }
 
         return $this->ranking[$level];
@@ -124,9 +124,8 @@ class Ballot
     {
         $level = $this->levelUsed + 1;
 
-        if (empty($this->ranking[$level]))
-        {
-            return null;
+        if (empty($this->ranking[$level])) {
+            return;
         }
 
         return $this->ranking[$level];
