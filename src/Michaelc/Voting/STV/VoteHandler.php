@@ -106,12 +106,15 @@ class VoteHandler
     /**
      * Allocate the next votes from a Ballot
      *
-     * @param Ballot $ballot 	The ballot to allocate the votes from
-     * @return Ballot 			The same ballot passed in modified
+     * @param Ballot $ballot 		The ballot to allocate the votes from
+     * @param float  $multiplier 	Number to multiply the weight by (surplus)
+     * @param float  $divisor 		The divisor of the weight (Total number of
+     *                          	candidate votes)
+     * @return Ballot 	The same ballot passed in modified
      */
-    protected function allocateVotes(Ballot &$ballot): Ballot
+    protected function allocateVotes(Ballot &$ballot, float $multiplier = 1.0, float $divisor = 1.0): Ballot
     {
-        $weight = $ballot->getWeight();
+        $weight = ($ballot->getWeight() * $multiplier) / $divisor;
         $candidate = $ballot->getNextChoice();
         $this->election->getCandidate($candidate->getId())->addVotes($weight);
         $ballot->setLevelUsed(($step - 1));
@@ -122,12 +125,46 @@ class VoteHandler
     /**
      * Transfer the votes from one candidate to other candidates
      *
-     * @param  float     $votes     [description]
-     * @param  Candidate $candidate [description]
-     * @return [type]               [description]
+     * @param  float     $surplus   The number of surplus votes to transfer
+     * @param  Candidate $candidate The candidate being elected to transfer
+     *                              the votes from
+     * @return
      */
-    protected function transferVotes(float $votes, Candidate $candidate)
+    protected function transferSurplusVotes(float $surplus, Candidate $candidate)
     {
+    	$totalVotes = $candiate->getVotes();
+    	$candidateId = $candidate->getId();
+
+    	foreach ($this->ballots as $i => $ballot)
+    	{
+        	if ($ballot->getPreviousChoice()->getId() == $candidateId)
+        	{
+		        $this->allocateVotes($ballot, $surplus, $totalVotes);
+        	}
+    	}
+
+        return;
+    }
+
+    /**
+     * Transfer the votes from one eliminated candidate to other candidates
+     *
+     * @param  Candidate $candidate  Candidate being eliminated to transfer
+     *                               the votes from
+     * @return
+     */
+    protected function transferEliminatedVotes(Candidate $candidate)
+    {
+    	$candidateId = $candidate->getId();
+
+    	foreach ($this->ballots as $i => $ballot)
+        {
+        	if ($ballot->getPreviousChoice()->getId() == $candidateId)
+        	{
+		        $this->allocateVotes($ballot);
+        	}
+        }
+
         return;
     }
 
@@ -183,7 +220,7 @@ class VoteHandler
 
         foreach($minimumCandidates as $minimumCandidate)
         {
-        	$this->transferVotes($minimumCandidate);
+        	$this->transferEliminatedVotes($minimumCandidate);
         	$minimumCandidate->setState(Candidate::DEFEATED);
         }
 
