@@ -114,7 +114,7 @@ class VoteHandler
      */
     protected function allocateVotes(Ballot &$ballot, float $multiplier = 1.0, float $divisor = 1.0): Ballot
     {
-        $weight = ($ballot->getWeight() * $multiplier) / $divisor;
+        $weight = $ballot->setWeight(($ballot->getWeight() * $multiplier) / $divisor);
         $candidate = $ballot->getNextChoice();
         $this->election->getCandidate($candidate->getId())->addVotes($weight);
         $ballot->setLevelUsed(($step - 1));

@@ -75,15 +75,14 @@ class Ballot
     /**
      * Sets the The current weighting or value of this person's vote.
      *
-     * @param float $weight the weight
-     *
-     * @return self
+     * @param  float    $weight     The weight
+     * @return float    $weight    The inputted weight
      */
-    public function setWeight(float $weight)
+    public function setWeight(float $weight): float
     {
         $this->weight = $weight;
 
-        return $this;
+        return $weight;
     }
 
     /**
@@ -132,10 +131,5 @@ class Ballot
         }
 
         return $this->ranking[$level];
-    }
-
-    public function getNextChoiceWorth(): float
-    {
-        return 0.0;
     }
 }
