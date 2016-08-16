@@ -105,7 +105,7 @@ class Ballot
     {
         $this->levelUsed++;
 
-        return $this->levelUSed;
+        return $this->levelUsed;
     }
 
     public function getLastChoice()
