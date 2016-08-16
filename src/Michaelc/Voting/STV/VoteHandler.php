@@ -137,7 +137,7 @@ class VoteHandler
 
     	foreach ($this->ballots as $i => $ballot)
     	{
-        	if ($ballot->getPreviousChoice()->getId() == $candidateId)
+        	if ($ballot->getLastChoice()->getId() == $candidateId)
         	{
 		        $this->allocateVotes($ballot, $surplus, $totalVotes);
         	}
@@ -159,7 +159,7 @@ class VoteHandler
 
     	foreach ($this->ballots as $i => $ballot)
         {
-        	if ($ballot->getPreviousChoice()->getId() == $candidateId)
+        	if ($ballot->getLastChoice()->getId() == $candidateId)
         	{
 		        $this->allocateVotes($ballot);
         	}
