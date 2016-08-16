@@ -122,6 +122,23 @@ class Election
     }
 
     /**
+     * Get an array of candidate ids
+     *
+     * @return int[]
+     */
+    public function getCandidateIds(): array
+    {
+        $candidateIds = [];
+
+        foreach ($candidates as $i => $candidate)
+        {
+            $candidateIds[] = $candidate->getId();
+        }
+
+        return $candidateIds;
+    }
+
+    /**
      * Gets the value of winnersCount.
      *
      * @return int

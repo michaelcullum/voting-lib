@@ -2,8 +2,6 @@
 
 namespace Michaelc\Voting\STV;
 
-use Michaelc\Voting\STV\{Election, Ballot, Candidate};
-
 class VoteHandler
 {
     /**
@@ -35,6 +33,13 @@ class VoteHandler
     protected $electedCandidates;
 
     /**
+     * Invalid ballots
+     *
+     * @var \MichaelC\Voting\STV\Ballot[]
+     */
+    protected $rejectedBallots;
+
+    /**
      * Constructor
      *
      * @param Election $election
@@ -44,6 +49,7 @@ class VoteHandler
         $this->election = $election;
         $this->ballots = $this->election->getBallots();
         $this->quota = $this->getQuota();
+        $this->rejectedBallots = [];
     }
 
     /**
@@ -53,11 +59,13 @@ class VoteHandler
      */
     public function run()
     {
+        $this->rejectInvalidBallots();
+
     	$this->firstStep();
 
         $candidates = $this->election->getActiveCandidates();
 
-        while ($electedCandidates < $this->election->getWinners())
+        while ($this->electedCandidates < $this->election->getWinnersCount())
         {
 	    	if (!$this->checkCandidates($candidates))
 	    	{
@@ -73,7 +81,7 @@ class VoteHandler
      *
      * @return
      */
-    public function firstStep()
+    protected function firstStep()
     {
         foreach ($this->ballots as $i => $ballot)
         {
@@ -100,7 +108,7 @@ class VoteHandler
             }
         }
 
-        return $elected ?? false;
+        return ($elected ?? false);
     }
 
     /**
@@ -119,8 +127,8 @@ class VoteHandler
 
         if ($candidate !== null)
         {
-	        $this->election->getCandidate($candidate->getId())->addVotes($weight);
-	        $ballot->setLevelUsed(($step - 1));
+	        $this->election->getCandidate($candidate)->addVotes($weight);
+	        $ballot->incrementLevelUsed();
         }
 
         return $ballot;
@@ -229,6 +237,41 @@ class VoteHandler
         }
 
         return count($minimumCandidates);
+    }
+
+    /**
+     * Reject any invalid ballots
+     *
+     * @return int    Number of rejected ballots
+     */
+    protected function rejectInvalidBallots(): int
+    {
+        $rejected = false;
+
+        foreach ($this->ballots as $i => $ballot)
+        {
+            if (count($ballot->getRanking()) > $this->election->getCandidateCount())
+            {
+                $rejected = true;
+            }
+            else
+            {
+                $candidateIds = $this->election->getCandidateIds();
+
+                foreach ($ballot->getRanking() as $i => $candidate)
+                {
+                    $rejected = (in_array($candidate, $candidateIds)) ? $rejected : true;
+                }
+            }
+
+            if ($rejected)
+            {
+                $this->rejectedBallots[] = clone $ballot;
+                unset($this->ballots[$i]);
+            }
+        }
+
+        return count($this->rejectedBallots);
     }
 
     /**

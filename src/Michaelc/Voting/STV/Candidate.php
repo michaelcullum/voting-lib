@@ -11,7 +11,7 @@ class Candidate
     /**
      * Identifier for the candidate
      *
-     * @var integer
+     * @var int
      */
     protected $id;
 
@@ -25,7 +25,7 @@ class Candidate
     /**
      * State of the candidate (use class constants)
      *
-     * @var integer
+     * @var int
      */
     protected $state;
 
@@ -42,7 +42,7 @@ class Candidate
     /**
      * Gets the Identifier for the candidate.
      *
-     * @return integer
+     * @return int
      */
     public function getId(): int
     {
@@ -76,7 +76,7 @@ class Candidate
     /**
      * Gets the State of the candidate (use class constants).
      *
-     * @return integer
+     * @return int
      */
     public function getState(): int
     {
@@ -86,7 +86,7 @@ class Candidate
     /**
      * Sets the State of the candidate (use class constants).
      *
-     * @param integer $state the state
+     * @param int $state the state
      *
      * @return self
      */

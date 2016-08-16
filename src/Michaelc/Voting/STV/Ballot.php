@@ -7,7 +7,7 @@ class Ballot
     /**
      * Ranking of candidates ids
      *
-     * @var integer[]
+     * @var int[]
      */
     protected $ranking;
 
@@ -21,15 +21,16 @@ class Ballot
     /**
      * The current preference in use from this ballot
      *
-     * @var integer
+     * @var int
      */
     protected $levelUsed;
 
     /**
      * Constructor
      *
-     * @param integer[] $ranking The ranking of candidates Key being ranking,
-     *                       value being a candidate id
+     * @param int[] $ranking The ranking of candidates Key being ranking,
+     *                       value being a candidate id. Zero-indexed (Key
+     *                       0 for first choice)
      */
     public function __construct(array $ranking)
     {
@@ -75,7 +76,7 @@ class Ballot
     /**
      * Sets the The current weighting or value of this person's vote.
      *
-     * @param  float    $weight     The weight
+     * @param  float    $weight    The weight
      * @return float    $weight    The inputted weight
      */
     public function setWeight(float $weight): float
@@ -88,7 +89,7 @@ class Ballot
     /**
      * Gets the the current preference in use from this ballot.
      *
-     * @return integer
+     * @return int
      */
     public function getLevelUsed(): int
     {
@@ -98,15 +99,13 @@ class Ballot
     /**
      * Sets the the current preference in use from this ballot.
      *
-     * @param integer $levelUsed
-     *
-     * @return self
+     * @return int
      */
-    public function setLevelUsed(int $levelUsed)
+    public function incrementLevelUsed(): int
     {
-        $this->levelUsed = $levelUsed;
+        $this->levelUsed++;
 
-        return $this;
+        return $this->levelUSed;
     }
 
     public function getLastChoice()
