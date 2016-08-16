@@ -41,6 +41,49 @@ class StvElectionTest extends \PHPUnit_Framework_TestCase
         $runner = new VoteHandler($election, $logger);
     }
 
+    public function testCandidatesStateSetting()
+    {
+        $election = $this->getSampleElection();
+
+        $election->getCandidates()[5]->setState(Candidate::ELECTED);
+        $election->getCandidates()[6]->setState(Candidate::ELECTED);
+
+        $election->getCandidates()[10]->setState(Candidate::DEFEATED);
+        $election->getCandidates()[11]->setState(Candidate::DEFEATED);
+
+        $this->assertEquals(Candidate::ELECTED, $election->getCandidates()[5]->getState());
+        $this->assertEquals(Candidate::ELECTED, $election->getCandidates()[6]->getState());
+
+        $this->assertEquals(Candidate::DEFEATED, $election->getCandidates()[10]->getState());
+        $this->assertEquals(Candidate::DEFEATED, $election->getCandidates()[11]->getState());
+
+        $this->assertEquals(Candidate::RUNNING, $election->getCandidates()[1]->getState());
+        $this->assertEquals(Candidate::RUNNING, $election->getCandidates()[2]->getState());
+    }
+
+    public function testCandidatesFetchingByState()
+    {
+        $election = $this->getSampleElection();
+
+        $election->getCandidates()[5]->setState(Candidate::ELECTED);
+        $election->getCandidates()[6]->setState(Candidate::ELECTED);
+
+        $election->getCandidates()[10]->setState(Candidate::DEFEATED);
+
+        $active = $election->getActiveCandidates();
+        $defeated = $election->getDefeatedCandidates();
+        $elected = $election->getElectedCandidates();
+
+        $this->assertContains($election->getCandidates()[5], $elected);
+        $this->assertContains($election->getCandidates()[6], $elected);
+        $this->assertContains($election->getCandidates()[10], $defeated);
+        $this->assertContains($election->getCandidates()[1], $active);
+
+        $this->assertCount(2, $elected);
+        $this->assertCount(1, $defeated);
+        $this->assertCount(($election->getCandidateCount() - 3), $active);
+    }
+
     protected function getSampleElection()
     {
         $candidates = $ballots = [];
