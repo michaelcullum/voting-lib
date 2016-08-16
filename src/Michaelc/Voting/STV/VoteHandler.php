@@ -342,7 +342,7 @@ class VoteHandler
     public function checkBallotValidity(Ballot $ballot): bool
     {
         if (count($ballot->getRanking()) > $this->election->getCandidateCount()) {
-            $this->logger->debug('Invalid ballot - number of candidates', ['ballot' => $ballot,]);
+            $this->logger->debug('Invalid ballot - number of candidates', ['ballot' => $ballot, ]);
 
             return false;
         } else {
