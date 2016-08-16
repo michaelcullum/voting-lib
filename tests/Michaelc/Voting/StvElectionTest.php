@@ -31,6 +31,13 @@ class StvElectionTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($candidateCount, $election->getActiveCandidateCount());
         $this->assertEquals($winners, $election->getWinnersCount());
         $this->assertEquals(2, $election->getNumBallots());
+
+        $candidateIds = $election->getCandidateIds();
+        $this->assertCount($candidateCount, $candidateIds);
+
+        for ($i = 1; $i <= $candidateCount; ++$i) {
+            $this->assertContains($i, $candidateIds);
+        }
     }
 
     public function testElectionRunner()
