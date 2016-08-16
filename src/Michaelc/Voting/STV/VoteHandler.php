@@ -116,8 +116,12 @@ class VoteHandler
     {
         $weight = $ballot->setWeight(($ballot->getWeight() * $multiplier) / $divisor);
         $candidate = $ballot->getNextChoice();
-        $this->election->getCandidate($candidate->getId())->addVotes($weight);
-        $ballot->setLevelUsed(($step - 1));
+
+        if ($candidate !== null)
+        {
+	        $this->election->getCandidate($candidate->getId())->addVotes($weight);
+	        $ballot->setLevelUsed(($step - 1));
+        }
 
         return $ballot;
     }
