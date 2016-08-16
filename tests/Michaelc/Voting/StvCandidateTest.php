@@ -14,4 +14,31 @@ class StvCandidateTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($candidate->getVotes(), 0.0);
         $this->assertEquals($candidate->getState(), Candidate::RUNNING);
     }
+
+    public function testCandidateStates()
+    {
+        $candidate = new Candidate(random_int(0,10));
+
+        $candidate->setState(Candidate::ELECTED);
+        $this->assertEquals($candidate->getState(), Candidate::ELECTED);
+
+        $candidate->setState(Candidate::RUNNING);
+        $this->assertEquals($candidate->getState(), Candidate::RUNNING);
+
+        $candidate->setState(Candidate::DEFEATED);
+        $this->assertEquals($candidate->getState(), Candidate::DEFEATED);
+    }
+
+    public function testCandidateVotes()
+    {
+        $candidate = new Candidate(random_int(0,10));
+
+        $this->assertEquals($candidate->getVotes(), 0.0);
+
+        $candidate->addVotes(4);
+        $this->assertEquals($candidate->getVotes(), 4.0);
+
+        $candidate->addVotes(0.11112);
+        $this->assertEquals($candidate->getVotes(), 4.11112);
+    }
 }
