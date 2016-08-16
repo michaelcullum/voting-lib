@@ -33,8 +33,7 @@ class StvElectionTest extends \PHPUnit_Framework_TestCase
 	public function testElectionRunner()
 	{
 		$election = $this->getSampleElection();
-		$logger = $this->getMockBuilder(Logger::class)
-		    ->getMock();
+		$logger = $this->createMock(Logger::class);
 
 		$runner = new VoteHandler($election, $logger);
 	}
