@@ -247,25 +247,9 @@ class VoteHandler
      */
     protected function rejectInvalidBallots(): int
     {
-        $rejected = false;
-
         foreach ($this->ballots as $i => $ballot)
         {
-            if (count($ballot->getRanking()) > $this->election->getCandidateCount())
-            {
-                $rejected = true;
-            }
-            else
-            {
-                $candidateIds = $this->election->getCandidateIds();
-
-                foreach ($ballot->getRanking() as $i => $candidate)
-                {
-                    $rejected = (in_array($candidate, $candidateIds)) ? $rejected : true;
-                }
-            }
-
-            if ($rejected)
+            if (!$this->checkBallotValidity($ballot))
             {
                 $this->rejectedBallots[] = clone $ballot;
                 unset($this->ballots[$i]);
@@ -273,6 +257,34 @@ class VoteHandler
         }
 
         return count($this->rejectedBallots);
+    }
+
+    /**
+     * Check if ballot is valid
+     *
+     * @param  Ballot &$Ballot  Ballot to test
+     * @return bool             True if valid, false if invalid
+     */
+    private function checkBallotValidity(Ballot &$Ballot): bool
+    {
+        if (count($ballot->getRanking()) > $this->election->getCandidateCount())
+        {
+            return false;
+        }
+        else
+        {
+            $candidateIds = $this->election->getCandidateIds();
+
+            foreach ($ballot->getRanking() as $i => $candidate)
+            {
+                if (!in_array($candidate, $candidateIds))
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     /**
