@@ -44,7 +44,7 @@ class VoteHandler
     /**
      * Logger.
      *
-     * @var Psr\Log\LoggerInterface
+     * @var \Psr\Log\LoggerInterface
      */
     protected $logger;
 
@@ -121,6 +121,8 @@ class VoteHandler
      */
     protected function checkCandidates(array $candidates): bool
     {
+        $elected = false;
+
         $this->logger->info('Checking if candidates have passed quota');
 
         foreach ($candidates as $i => $candidate) {
@@ -134,7 +136,7 @@ class VoteHandler
 
         $this->logger->info("Candidate checking complete. Someone was elected: $elected");
 
-        return $elected ?? false;
+        return $elected;
     }
 
     /**
@@ -266,7 +268,7 @@ class VoteHandler
 
         foreach ($minimumCandidates as $minimumCandidate) {
             $this->logger->notice('Eliminating a candidate', array(
-                'candidate' => $candidate,
+                'minimumCandidate' => $minimumCandidate,
             ));
 
             $this->transferEliminatedVotes($minimumCandidate);
@@ -323,17 +325,17 @@ class VoteHandler
 
         $count = count($this->rejectedBallots);
 
-        $this->logger->notice('Found $count rejected ballots ', array(
+        $this->logger->notice("Found $count rejected ballots", array(
             'ballots' => $this->rejectedBallots,
         ));
 
-        return count($this->rejectedBallots);
+        return $count;
     }
 
     /**
      * Check if ballot is valid.
      *
-     * @param Ballot $Ballot Ballot to test
+     * @param Ballot $ballot Ballot to test
      *
      * @return bool True if valid, false if invalid
      */
