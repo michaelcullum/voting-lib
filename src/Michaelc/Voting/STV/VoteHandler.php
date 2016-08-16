@@ -209,10 +209,32 @@ class VoteHandler
      * Eliminate the candidate(s) with the lowest number of votes
      * and reallocated their votes
      *
-     * @param  array  $candidates 	Array of active candidates
+     * @param  \Michaelc\Voting\STV\Candidate[] $candidates
+     *                              Array of active candidates
      * @return int 					Number of candidates eliminated
      */
     protected function eliminateCandidates(array &$candidates): int
+    {
+        $minimumCandidates = $this->getLowestCandidates($candidates);
+
+        foreach ($minimumCandidates as $minimumCandidate)
+        {
+            $this->transferEliminatedVotes($minimumCandidate);
+            $minimumCandidate->setState(Candidate::DEFEATED);
+        }
+
+        return count($minimumCandidates);
+    }
+
+    /**
+     * Get candidates with the lowest number of votes
+     *
+     * @param  \Michaelc\Voting\STV\Candidate[] $candidates
+     *                             Array of active candidates
+     * @return \Michaelc\Voting\STV\Candidate[]
+     *                             Candidates with lowest score
+     */
+    protected function getLowestCandidates(array $candidates): array
     {
         $minimum = 0;
         $minimumCandidates = [];
@@ -231,13 +253,7 @@ class VoteHandler
             }
         }
 
-        foreach ($minimumCandidates as $minimumCandidate)
-        {
-            $this->transferEliminatedVotes($minimumCandidate);
-            $minimumCandidate->setState(Candidate::DEFEATED);
-        }
-
-        return count($minimumCandidates);
+        return $minimumCandidates;
     }
 
     /**
