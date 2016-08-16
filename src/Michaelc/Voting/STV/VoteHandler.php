@@ -144,12 +144,12 @@ class VoteHandler
      */
     protected function transferSurplusVotes(float $surplus, Candidate $candidate)
     {
-    	$totalVotes = $candiate->getVotes();
+    	$totalVotes = $candidate->getVotes();
     	$candidateId = $candidate->getId();
 
     	foreach ($this->ballots as $i => $ballot)
     	{
-        	if ($ballot->getLastChoice()->getId() == $candidateId)
+        	if ($ballot->getLastChoice() == $candidateId)
         	{
 		        $this->allocateVotes($ballot, $surplus, $totalVotes);
         	}
@@ -171,7 +171,7 @@ class VoteHandler
 
     	foreach ($this->ballots as $i => $ballot)
         {
-        	if ($ballot->getLastChoice()->getId() == $candidateId)
+        	if ($ballot->getLastChoice() == $candidateId)
         	{
 		        $this->allocateVotes($ballot);
         	}

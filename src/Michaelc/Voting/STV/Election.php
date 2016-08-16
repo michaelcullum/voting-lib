@@ -130,7 +130,7 @@ class Election
     {
         $candidateIds = [];
 
-        foreach ($candidates as $i => $candidate)
+        foreach ($this->candidates as $i => $candidate)
         {
             $candidateIds[] = $candidate->getId();
         }
