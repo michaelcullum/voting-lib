@@ -3,6 +3,7 @@
 namespace Tests\Michaelc\Voting;
 
 use Michaelc\Voting\STV\{Election, Candidate, Ballot, VoteHandler};
+use Psr\Log\LoggerInterface as Logger;
 
 class StvElectionTest extends \PHPUnit_Framework_TestCase
 {
@@ -32,7 +33,10 @@ class StvElectionTest extends \PHPUnit_Framework_TestCase
 	public function testElectionRunner()
 	{
 		$election = $this->getSampleElection();
-		$runner = new VoteHandler($election);
+		$logger = $this->getMockBuilder(Logger::class)
+		    ->getMock();
+
+		$runner = new VoteHandler($election, $logger);
 	}
 
 	protected function getSampleElection()

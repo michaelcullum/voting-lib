@@ -2,6 +2,8 @@
 
 namespace Michaelc\Voting\STV;
 
+use Psr\Log\LoggerInterface as Logger;
+
 class VoteHandler
 {
     /**
@@ -40,15 +42,22 @@ class VoteHandler
     protected $rejectedBallots;
 
     /**
+     * Logger
+     *
+     * @var Psr\Log\LoggerInterface
+     */
+    protected $logger;
+
+    /**
      * Constructor
      *
      * @param Election $election
      */
-    public function __construct(Election $election)
+    public function __construct(Election $election, Logger $logger)
     {
+        $this->logger = $logger;
         $this->election = $election;
         $this->ballots = $this->election->getBallots();
-        $this->quota = $this->getQuota();
         $this->rejectedBallots = [];
     }
 
@@ -59,7 +68,10 @@ class VoteHandler
      */
     public function run()
     {
+        $this->logger->notice('Starting to run an election');
+
         $this->rejectInvalidBallots();
+        $this->quota = $this->getQuota();
 
         $this->firstStep();
 
@@ -73,6 +85,8 @@ class VoteHandler
             }
         }
 
+        $this->logger->notice('Election complete');
+
         return $this->election->getElectedCandidates();
     }
 
@@ -83,10 +97,20 @@ class VoteHandler
      */
     protected function firstStep()
     {
+        $this->logger->info('Beginning the first step');
+
         foreach ($this->ballots as $i => $ballot)
         {
+            $this->logger->debug("Processing ballot $i in stage 1",
+                ['ballot' => $ballot,]
+            );
+
             $this->allocateVotes($ballot);
         }
+
+        $this->logger->notice('First step complete',
+            ['candidatesStatus' => $this->election->getCandidatesStatus()]
+        );
 
         return;
     }
@@ -97,16 +121,22 @@ class VoteHandler
      * @param  array  $candidates 	Array of active candidates to check
      * @return bool 				Whether any candidates were changed to elected
      */
-    protected function checkCandidates(array &$candidates): bool
+    protected function checkCandidates(array $candidates): bool
     {
+        $this->logger->info('Checking if candidates have passed quota');
+
         foreach ($candidates as $i => $candidate)
         {
+            $this->logger->debug('Checking candidate', ['candidate' => $candidate]);
+
             if ($candidate->getVotes() >= $this->quota)
             {
                 $this->electCandidate($candidate);
                 $elected = true;
             }
         }
+
+        $this->logger->info("Candidate checking complete. Someone was elected: $elected");
 
         return ($elected ?? false);
     }
@@ -120,15 +150,22 @@ class VoteHandler
      *                          	candidate votes)
      * @return Ballot 	The same ballot passed in modified
      */
-    protected function allocateVotes(Ballot &$ballot, float $multiplier = 1.0, float $divisor = 1.0): Ballot
+    protected function allocateVotes(Ballot $ballot, float $multiplier = 1.0, float $divisor = 1.0): Ballot
     {
         $weight = $ballot->setWeight(($ballot->getWeight() * $multiplier) / $divisor);
         $candidate = $ballot->getNextChoice();
+
+        $this->logger->debug('Allocating votes of ballot', array(
+            'ballot' => $ballot,
+            'weight' => $weight,
+            'candidate' => $candidate
+        ));
 
         if ($candidate !== null)
         {
             $this->election->getCandidate($candidate)->addVotes($weight);
             $ballot->incrementLevelUsed();
+            $this->logger->debug('Vote added to candidate');
         }
 
         return $ballot;
@@ -146,6 +183,12 @@ class VoteHandler
     {
     	$totalVotes = $candidate->getVotes();
     	$candidateId = $candidate->getId();
+
+        $this->logger->info('Transfering surplus votes', array(
+            'surplus' => $surplus,
+            'candidate' => $candidate,
+            'totalVotes' => $totalVotes
+        ));
 
     	foreach ($this->ballots as $i => $ballot)
     	{
@@ -169,6 +212,11 @@ class VoteHandler
     {
     	$candidateId = $candidate->getId();
 
+        $this->logger->info('Transfering votes from eliminated candidate', array(
+            'votes' => $candidate->getVotes(),
+            'candidate' => $candidate
+        ));
+
     	foreach ($this->ballots as $i => $ballot)
         {
         	if ($ballot->getLastChoice() == $candidateId)
@@ -190,8 +238,12 @@ class VoteHandler
     {
         if ($candidate->getVotes() < $this->quota)
         {
-            throw new Exception("We shouldn't be electing someone who hasn't met the quota");
+            throw new VotingException("We shouldn't be electing someone who hasn't met the quota");
         }
+
+        $this->logger->notice('Electing a candidate', array(
+            'candidate' => $candidate
+        ));
 
         $candidate->setState(Candidate::ELECTED);
         $this->electedCandidates++;
@@ -206,19 +258,26 @@ class VoteHandler
     }
 
     /**
-     * Eliminate the candidate(s) with the lowest number of votes
+     * Eliminate the candidate with the lowest number of votes
      * and reallocated their votes
+     *
+     * TODO: Eliminate all lowest candidates after step one, then
+     * randomly choose.
      *
      * @param  \Michaelc\Voting\STV\Candidate[] $candidates
      *                              Array of active candidates
      * @return int 					Number of candidates eliminated
      */
-    protected function eliminateCandidates(array &$candidates): int
+    protected function eliminateCandidates(array $candidates): int
     {
         $minimumCandidates = $this->getLowestCandidates($candidates);
 
         foreach ($minimumCandidates as $minimumCandidate)
         {
+            $this->logger->notice('Eliminating a candidate', array(
+                'candidate' => $candidate
+            ));
+
             $this->transferEliminatedVotes($minimumCandidate);
             $minimumCandidate->setState(Candidate::DEFEATED);
         }
@@ -234,7 +293,7 @@ class VoteHandler
      * @return \Michaelc\Voting\STV\Candidate[]
      *                             Candidates with lowest score
      */
-    protected function getLowestCandidates(array $candidates): array
+    public function getLowestCandidates(array $candidates): array
     {
         $minimum = 0;
         $minimumCandidates = [];
@@ -252,6 +311,10 @@ class VoteHandler
                 $minimumCandidates[] = $candidate;
             }
         }
+
+        $this->logger->info('Calculated lowest candidates', array(
+            'minimumCandidates' => $minimumCandidates
+        ));
 
         return $minimumCandidates;
     }
@@ -272,19 +335,29 @@ class VoteHandler
             }
         }
 
+        $count = count($this->rejectedBallots);
+
+        $this->logger->notice('Found $count rejected ballots ', array(
+            'ballots' => $this->rejectedBallots,
+        ));
+
         return count($this->rejectedBallots);
     }
 
     /**
      * Check if ballot is valid
      *
-     * @param  Ballot &$Ballot  Ballot to test
+     * @param  Ballot $Ballot  Ballot to test
      * @return bool             True if valid, false if invalid
      */
-    private function checkBallotValidity(Ballot &$ballot): bool
+    public function checkBallotValidity(Ballot $ballot): bool
     {
         if (count($ballot->getRanking()) > $this->election->getCandidateCount())
         {
+            $this->logger->debug('Invalid ballot - number of candidates', array(
+                'ballot' => $ballot
+            ));
+
             return false;
         }
         else
@@ -295,10 +368,18 @@ class VoteHandler
             {
                 if (!in_array($candidate, $candidateIds))
                 {
+                    $this->logger->debug('Invalid ballot - invalid candidate', array(
+                        'ballot' => $ballot,
+                        'candidate' => $candidate,
+                        'candidates' => $candidateIds
+                    ));
+
                     return false;
                 }
             }
         }
+
+        $this->logger->debug('No invalid ballots found');
 
         return true;
     }
@@ -310,10 +391,14 @@ class VoteHandler
      */
     public function getQuota(): int
     {
-        return floor(
+        $quota = floor(
             ($this->election->getNumBallots() /
                 ($this->election->getWinnersCount() + 1)
             )
             + 1);
+
+        $this->logger->info("Quota set: $quota");
+
+        return $quota;
     }
 }

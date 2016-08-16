@@ -91,6 +91,16 @@ class Election
     }
 
     /**
+     * Get an array of candidates defeated
+     *
+     * @return \Michaelc\Voting\STV\Candidate[]
+     */
+    public function getDefeatedCandidates(): array
+    {
+        return $this->getStateCandidates(Candidate::DEFEATED);
+    }
+
+    /**
      * Get all candidates of a specific state
      *
      * @param  int    $state A candidate state (See Candidate constants)
@@ -176,5 +186,32 @@ class Election
     public function getNumBallots(): int
     {
         return count($this->ballots);
+    }
+
+    /**
+     * Get status of all candidates
+     *
+     * @return array
+     */
+    public function getCandidatesStatus(): array
+    {
+        $candidates = [];
+
+        foreach ($this->getElectedCandidates() as $i => $candidate)
+        {
+            $candidates['elected'][] = $candidate->getId();
+        }
+
+        foreach ($this->getActiveCandidates() as $i => $candidate)
+        {
+            $candidates['active'][] = [$candidate->getId(), $candidate->getVotes()];
+        }
+
+        foreach ($this->getDefeatedCandidates() as $i => $candidate)
+        {
+            $candidates['defeated'][] = $candidate->getId();
+        }
+
+        return $candidates;
     }
 }
