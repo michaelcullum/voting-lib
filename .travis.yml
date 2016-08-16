@@ -1,0 +1,23 @@
+language: php
+
+php:
+    - 7.0
+    - nightly
+matrix:
+  allow_failures:
+    - php: nightly
+
+install:
+  - sudo apt-get update
+  - travis_retry sudo apt-get install parallel
+
+before_script:
+  - phpenv rehash
+  - composer install
+
+script:
+  - bin/phpunit
+  - find . -path ./vendor -prune -o -type f -name "*.php" | parallel --gnu --keep-order 'php -l {} > /dev/null' || exit 1
+
+notifications:
+  slack: phpfig:wzpXbRPQXl5837iGf3UoRSfY
