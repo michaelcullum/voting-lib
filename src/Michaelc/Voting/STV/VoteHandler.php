@@ -281,7 +281,7 @@ class VoteHandler
      * @param  Ballot &$Ballot  Ballot to test
      * @return bool             True if valid, false if invalid
      */
-    private function checkBallotValidity(Ballot &$Ballot): bool
+    private function checkBallotValidity(Ballot &$ballot): bool
     {
         if (count($ballot->getRanking()) > $this->election->getCandidateCount())
         {
