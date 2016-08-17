@@ -17,7 +17,7 @@ class StvCandidateTest extends \PHPUnit_Framework_TestCase
 
     public function testCandidateStates()
     {
-        $candidate = new Candidate(random_int(0,10));
+        $candidate = new Candidate(random_int(0, 10));
 
         $candidate->setState(Candidate::ELECTED);
         $this->assertEquals($candidate->getState(), Candidate::ELECTED);
@@ -31,7 +31,7 @@ class StvCandidateTest extends \PHPUnit_Framework_TestCase
 
     public function testCandidateVotes()
     {
-        $candidate = new Candidate(random_int(0,10));
+        $candidate = new Candidate(random_int(0, 10));
 
         $this->assertEquals($candidate->getVotes(), 0.0);
 

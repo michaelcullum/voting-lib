@@ -58,13 +58,11 @@ class StvBallotTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(9, $ballot->getNextChoice());
         $ballot->incrementLevelUsed();
 
-        foreach ($ranking as $rank => $candidate)
-        {
+        foreach ($ranking as $rank => $candidate) {
             $this->assertEquals($candidate, $ballot->getLastChoice());
 
-            if ($rank != 4)
-            {
-                $this->assertEquals($ranking[($rank+1)], $ballot->getNextChoice());
+            if ($rank != 4) {
+                $this->assertEquals($ranking[($rank + 1)], $ballot->getNextChoice());
             }
 
             $ballot->incrementLevelUsed();
