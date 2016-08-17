@@ -2,6 +2,13 @@
     "name": "michaelcullum/voting-lib",
     "license": "MIT",
     "type": "library",
+    "authors": [
+        {
+            "name": "Michael Cullum",
+            "email": "m@michaelcullum.com",
+            "homepage": "http://www.michaelcullum.com/"
+        }
+    ],
     "autoload": {
         "psr-4": {
             "Michaelc\\Voting\\": "src/"
