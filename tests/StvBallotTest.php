@@ -17,25 +17,25 @@ class StvBallotTest extends \PHPUnit_Framework_TestCase
 
     public function testBallotWeighting()
     {
-    	$ranking = [3, 2, 1];
-    	$ballot = new Ballot($ranking);
+        $ranking = [3, 2, 1];
+        $ballot = new Ballot($ranking);
 
         $this->assertEquals($ballot->getWeight(), 1.0);
 
-		$ballot->setWeight(($ballot->getWeight() * 1.0) / 1.0);
+        $ballot->setWeight(($ballot->getWeight() * 1.0) / 1.0);
         $this->assertEquals($ballot->getWeight(), 1.0);
 
-		$ballot->setWeight(($ballot->getWeight() * 5.0) / 20);
+        $ballot->setWeight(($ballot->getWeight() * 5.0) / 20);
         $this->assertEquals($ballot->getWeight(), 0.25);
 
-		$ballot->setWeight(($ballot->getWeight() * 3) / 18);
+        $ballot->setWeight(($ballot->getWeight() * 3) / 18);
         $this->assertEquals($ballot->getWeight(), 0.041666666666667);
     }
 
     public function testBallotLevels()
     {
-    	$ranking = [9, 6, 4, 1, 7];
-    	$ballot = new Ballot($ranking);
+        $ranking = [9, 6, 4, 1, 7];
+        $ballot = new Ballot($ranking);
 
         $this->assertEquals($ballot->getLevelUsed(), -1);
 
@@ -49,27 +49,27 @@ class StvBallotTest extends \PHPUnit_Framework_TestCase
 
     public function testChoiceRetrival()
     {
-    	$ranking = [9, 6, 4, 1, 7];
-    	$ballot = new Ballot($ranking);
+        $ranking = [9, 6, 4, 1, 7];
+        $ballot = new Ballot($ranking);
 
-    	$this->assertNull($ballot->getLastChoice());
-    	$this->assertNotNull($ballot->getNextChoice());
+        $this->assertNull($ballot->getLastChoice());
+        $this->assertNotNull($ballot->getNextChoice());
 
-    	$this->assertEquals(9, $ballot->getNextChoice());
-    	$ballot->incrementLevelUsed();
+        $this->assertEquals(9, $ballot->getNextChoice());
+        $ballot->incrementLevelUsed();
 
-    	foreach ($ranking as $rank => $candidate)
-    	{
-    		$this->assertEquals($candidate, $ballot->getLastChoice());
+        foreach ($ranking as $rank => $candidate)
+        {
+            $this->assertEquals($candidate, $ballot->getLastChoice());
 
-    		if ($rank != 4)
-    		{
-	    		$this->assertEquals($ranking[($rank+1)], $ballot->getNextChoice());
-    		}
+            if ($rank != 4)
+            {
+                $this->assertEquals($ranking[($rank+1)], $ballot->getNextChoice());
+            }
 
-    		$ballot->incrementLevelUsed();
-    	}
+            $ballot->incrementLevelUsed();
+        }
 
-    	$this->assertNull($ballot->getNextChoice());
+        $this->assertNull($ballot->getNextChoice());
     }
 }
