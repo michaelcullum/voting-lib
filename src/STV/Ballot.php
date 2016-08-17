@@ -50,20 +50,6 @@ class Ballot
     }
 
     /**
-     * Sets the Ranking of candidates ids.
-     *
-     * @param array $ranking the ranking
-     *
-     * @return self
-     */
-    public function setRanking(array $ranking)
-    {
-        $this->ranking = $ranking;
-
-        return $this;
-    }
-
-    /**
      * Gets the The current weighting or value of this person's vote.
      *
      * @return float

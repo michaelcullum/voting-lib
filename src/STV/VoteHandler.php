@@ -154,6 +154,8 @@ class VoteHandler
         $weight = $ballot->setWeight(($ballot->getWeight() * $multiplier) / $divisor);
         $candidate = $ballot->getNextChoice();
 
+        // TODO: Check if candidate is withdrawn
+
         $this->logger->debug('Allocating votes of ballot', array(
             'ballot' => $ballot,
             'weight' => $weight,
