@@ -95,7 +95,7 @@ class StvElectionTest extends \PHPUnit_Framework_TestCase
             $ballots[] = new Ballot([random_int(1, 20), random_int(1, 20), random_int(1, 20)]);
         }
 
-        $election = new Election(2, $candidates, $ballots);
+        $election = new Election(6, $candidates, $ballots);
 
         return $election;
     }

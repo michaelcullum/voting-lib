@@ -15,7 +15,7 @@ class StvElectionRunnerTest extends \PHPUnit_Framework_TestCase
     {
         $election = StvElectionTest::getSampleElection();
         $logger = $this->createMock(Logger::class);
-        $logger = new \Tests\Michaelc\Voting\TestLogger();
+        //$logger = new \Tests\Michaelc\Voting\TestLogger();
 
         $runner = new VoteHandler($election, $logger);
         $runner->run();
