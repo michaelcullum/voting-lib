@@ -363,7 +363,7 @@ class VoteHandler
             }
         }
 
-        $this->logger->debug('No invalid ballots found');
+        $this->logger->debug('Ballot is valid');
 
         return true;
     }

@@ -40,15 +40,6 @@ class StvElectionTest extends \PHPUnit_Framework_TestCase
         }
     }
 
-    public function testElectionRunner()
-    {
-        $election = $this->getSampleElection();
-        $logger = $this->createMock(Logger::class);
-
-        $runner = new VoteHandler($election, $logger);
-        $runner->run();
-    }
-
     public function testCandidatesStateSetting()
     {
         $election = $this->getSampleElection();
@@ -92,7 +83,7 @@ class StvElectionTest extends \PHPUnit_Framework_TestCase
         $this->assertCount(($election->getCandidateCount() - 3), $active);
     }
 
-    protected function getSampleElection()
+    public static function getSampleElection()
     {
         $candidates = $ballots = [];
 
@@ -104,7 +95,7 @@ class StvElectionTest extends \PHPUnit_Framework_TestCase
             $ballots[] = new Ballot([random_int(1, 20), random_int(1, 20), random_int(1, 20)]);
         }
 
-        $election = new Election(12, $candidates, $ballots);
+        $election = new Election(2, $candidates, $ballots);
 
         return $election;
     }
