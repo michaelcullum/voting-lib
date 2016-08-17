@@ -46,6 +46,7 @@ class StvElectionTest extends \PHPUnit_Framework_TestCase
         $logger = $this->createMock(Logger::class);
 
         $runner = new VoteHandler($election, $logger);
+        $runner->run();
     }
 
     public function testCandidatesStateSetting()
