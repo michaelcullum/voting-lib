@@ -40,6 +40,16 @@ class Candidate
     }
 
     /**
+     * String representation of candidates
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        return (string) $this->id;
+    }
+
+    /**
      * Gets the Identifier for the candidate.
      *
      * @return int
