@@ -81,6 +81,8 @@ class VoteHandler
             if (!$this->checkCandidates($candidates)) {
                 $this->eliminateCandidates($candidates);
             }
+
+            $candidates = $this->election->getActiveCandidates();
         }
 
         $this->logger->notice('Election complete');
@@ -122,6 +124,7 @@ class VoteHandler
     protected function checkCandidates(array $candidates): bool
     {
         $elected = false;
+        $candidatesToElect = [];
 
         $this->logger->info('Checking if candidates have passed quota');
 
@@ -129,9 +132,13 @@ class VoteHandler
             $this->logger->debug('Checking candidate', ['candidate' => $candidate]);
 
             if ($candidate->getVotes() >= $this->quota) {
-                $this->electCandidate($candidate);
+                $candidatesToElect[] = $candidate;
                 $elected = true;
             }
+        }
+
+        foreach ($candidatesToElect as $i => $candidate) {
+            $this->electCandidate($candidate);
         }
 
         $this->logger->info("Candidate checking complete. Someone was elected: $elected");
@@ -156,10 +163,8 @@ class VoteHandler
 
         // TODO: Check if candidate is withdrawn
 
-        $this->logger->debug('Allocating votes of ballot', array(
+        $this->logger->debug("Allocating vote of weight $weight to $candidate", array(
             'ballot' => $ballot,
-            'weight' => $weight,
-            'candidate' => $candidate,
         ));
 
         if ($candidate !== null) {
