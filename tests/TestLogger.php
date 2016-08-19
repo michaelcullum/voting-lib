@@ -11,7 +11,7 @@ class TestLogger implements Logger
 
 	public function log($level, $message, array $context = array())
 	{
-		echo($message);
-		echo("\r\n");
+		fputs(STDERR, $message);
+		fputs(STDERR, "\r\n");
 	}
 }
