@@ -83,7 +83,9 @@ class Election
     {
         $ids = [];
 
-        foreach ($this->getActiveCandidates() as $i => $candidate) {
+        $candidates = $this->getActiveCandidates();
+
+        foreach ($candidates as $i => $candidate) {
             $ids[] = $candidate->getId();
         }
 

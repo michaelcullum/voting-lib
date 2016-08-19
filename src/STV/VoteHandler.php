@@ -52,6 +52,8 @@ class VoteHandler
 
     protected $validBallots;
 
+    protected $candidatesToElect;
+
     /**
      * Constructor.
      *
@@ -63,6 +65,7 @@ class VoteHandler
         $this->election = $election;
         $this->ballots = $this->election->getBallots();
         $this->rejectedBallots = [];
+        $this->candidatesToElect = $this->election->getWinnersCount();
 
         $this->validBallots = $this->election->getNumBallots();
     }
@@ -84,13 +87,23 @@ class VoteHandler
 
         $candidates = $this->election->getActiveCandidates();
 
-        while ($this->electedCandidates < $this->election->getWinnersCount()) {
+        while (($this->candidatesToElect > 0) && ($this->election->getActiveCandidateCount() > $this->candidatesToElect)) {
             if (!$this->checkCandidates($candidates)) {
                 $this->eliminateCandidates($candidates);
             }
 
             $candidates = $this->election->getActiveCandidates();
         }
+
+        if (!empty($candidates))
+        {
+            $this->logger->info('All votes re-allocated. Electing all remaining candidates');
+
+            foreach ($candidates as $i => $candidate) {
+                $this->electCandidate($candidate);
+            }
+        }
+
 
         $this->logger->notice('Election complete');
 
@@ -253,14 +266,11 @@ class VoteHandler
      */
     protected function electCandidate(Candidate $candidate)
     {
-        if ($candidate->getVotes() < $this->quota) {
-            throw new VotingException("We shouldn't be electing someone who hasn't met the quota");
-        }
-
         $this->logger->notice("Electing a candidate: $candidate");
 
         $candidate->setState(Candidate::ELECTED);
-        ++$this->electedCandidates;
+        $this->electedCandidates++;
+        $this->candidatesToElect--;
 
         if ($this->electedCandidates < $this->election->getWinnersCount()) {
             $surplus = $candidate->getVotes() - $this->quota;
@@ -279,24 +289,22 @@ class VoteHandler
      * Eliminate the candidate with the lowest number of votes
      * and reallocated their votes.
      *
-     * TODO: Eliminate all lowest candidates after step one, then
-     * randomly choose.
-     *
-     * @param \Michaelc\Voting\STV\Candidate[] $candidates
-     *                                                     Array of active candidates
+     * @param \Michaelc\Voting\STV\Candidate[] $candidates Array of active candidates
      *
      * @return int Number of candidates eliminated
      */
     protected function eliminateCandidates(array $candidates): int
     {
         $minimumCandidates = $this->getLowestCandidates($candidates);
+        $count = count($minimumCandidates);
 
-        foreach ($minimumCandidates as $minimumCandidate) {
-            $this->logger->notice("Eliminating a candidate: $minimumCandidate");
+        $minimumCandidate = $minimumCandidates[(array_rand($minimumCandidates))];
 
-            $this->transferEliminatedVotes($minimumCandidate);
-            $minimumCandidate->setState(Candidate::DEFEATED);
-        }
+        $this->logger->notice(sprintf("There were %d joint lowest candidates,
+            %d was randomly selected to be eliminated", $count, $minimumCandidate->getId()));
+
+        $this->transferEliminatedVotes($minimumCandidate);
+        $minimumCandidate->setState(Candidate::DEFEATED);
 
         return count($minimumCandidates);
     }
@@ -322,12 +330,11 @@ class VoteHandler
                 $minimumCandidates[] = $candidate;
             } elseif ($candidate->getVotes() == $minimum) {
                 $minimumCandidates[] = $candidate;
+                $this->logger->info("Calculated as a lowest candidate: $candidate");
             }
         }
 
         $count = count($minimumCandidates);
-
-        $this->logger->info("Calculated the joint lowest candidates ($count)");
 
         return $minimumCandidates;
     }

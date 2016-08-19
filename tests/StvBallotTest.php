@@ -29,7 +29,7 @@ class StvBallotTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($ballot->getWeight(), 0.25);
 
         $ballot->setWeight(($ballot->getWeight() * 3) / 18);
-        $this->assertEquals($ballot->getWeight(), 0.041666666666667);
+        $this->assertEquals($ballot->getWeight(), round(0.041666666666667, 5));
     }
 
     public function testBallotLevels()

@@ -68,7 +68,7 @@ class Ballot
      */
     public function setWeight(float $weight): float
     {
-        $this->weight = round($weight, 15);
+        $this->weight = round($weight, 5);
 
         return $weight;
     }

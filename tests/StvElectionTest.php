@@ -83,7 +83,7 @@ class StvElectionTest extends \PHPUnit_Framework_TestCase
         $this->assertCount(($election->getCandidateCount() - 3), $active);
     }
 
-    public static function getSampleElection()
+    public static function getSampleElection($winners = 4)
     {
         $candidates = $ballots = [];
 
@@ -93,7 +93,7 @@ class StvElectionTest extends \PHPUnit_Framework_TestCase
 
         $ballots = StvBallotTest::getBallotSample();
 
-        $election = new Election(8, $candidates, $ballots);
+        $election = new Election($winners, $candidates, $ballots);
 
         return $election;
     }
