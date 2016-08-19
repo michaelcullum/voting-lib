@@ -72,11 +72,18 @@ class StvElectionTest extends \PHPUnit_Framework_TestCase
         $active = $election->getActiveCandidates();
         $defeated = $election->getDefeatedCandidates();
         $elected = $election->getElectedCandidates();
+        $activeIds = $election->getActiveCandidateIds();
 
         $this->assertContains($election->getCandidates()[5], $elected);
         $this->assertContains($election->getCandidates()[6], $elected);
         $this->assertContains($election->getCandidates()[10], $defeated);
         $this->assertContains($election->getCandidates()[1], $active);
+
+        $this->assertContains(8, $activeIds);
+        $this->assertContains(1, $activeIds);
+        $this->assertNotContains(6, $activeIds);
+        $this->assertNotContains(10, $activeIds);
+        $this->assertCount(($election->getCandidateCount() - 3), $activeIds);
 
         $this->assertCount(2, $elected);
         $this->assertCount(1, $defeated);
