@@ -87,15 +87,13 @@ class StvElectionTest extends \PHPUnit_Framework_TestCase
     {
         $candidates = $ballots = [];
 
-        for ($i = 1; $i <= 20; ++$i) {
+        for ($i = 1; $i <= 15; ++$i) {
             $candidates[$i] = new Candidate($i);
         }
 
-        for ($i = 0; $i <= 40; ++$i) {
-            $ballots[] = new Ballot([random_int(1, 20), random_int(1, 20), random_int(1, 20)]);
-        }
+        $ballots = StvBallotTest::getBallotSample();
 
-        $election = new Election(12, $candidates, $ballots);
+        $election = new Election(8, $candidates, $ballots);
 
         return $election;
     }
