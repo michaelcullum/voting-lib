@@ -3,6 +3,8 @@
 namespace Michaelc\Voting\STV;
 
 use Psr\Log\LoggerInterface as Logger;
+use Michaelc\Voting\Exception\VotingLogicException as LogicException;
+use Michaelc\Voting\Exception\VotingRuntimeException as RuntimeException;
 
 class VoteHandler
 {
@@ -48,6 +50,8 @@ class VoteHandler
      */
     protected $logger;
 
+    protected $validBallots;
+
     /**
      * Constructor.
      *
@@ -59,6 +63,8 @@ class VoteHandler
         $this->election = $election;
         $this->ballots = $this->election->getBallots();
         $this->rejectedBallots = [];
+
+        $this->validBallots = $this->election->getNumBallots();
     }
 
     /**
@@ -69,6 +75,7 @@ class VoteHandler
     public function run()
     {
         $this->logger->notice('Starting to run an election');
+        $this->logger->notice(sprintf('There are %d candidates, %d ballots and to be %d winners', $this->election->getCandidateCount(), $this->validBallots, $this->election->getWinnersCount()));
 
         $this->rejectInvalidBallots();
         $this->quota = $this->getQuota();
@@ -100,9 +107,7 @@ class VoteHandler
         $this->logger->info('Beginning the first step');
 
         foreach ($this->ballots as $i => $ballot) {
-            $this->logger->debug("Processing ballot $i in stage 1",
-                ['ballot' => $ballot]
-            );
+            $this->logger->debug("Processing ballot $i in stage 1");
 
             $this->allocateVotes($ballot);
         }
@@ -128,10 +133,17 @@ class VoteHandler
 
         $this->logger->info('Checking if candidates have passed quota');
 
-        foreach ($candidates as $i => $candidate) {
-            $this->logger->debug('Checking candidate', ['candidate' => $candidate]);
+        if (empty($candidates))
+        {
+            throw new LogicException("There are no more candidates left");
+        }
 
-            if ($candidate->getVotes() >= $this->quota) {
+        foreach ($candidates as $i => $candidate) {
+            $votes = $candidate->getVotes();
+
+            $this->logger->debug("Checking candidate ($candidate) with $votes", ['candidate' => $candidate]);
+
+            if ($votes >= $this->quota) {
                 $candidatesToElect[] = $candidate;
                 $elected = true;
             }
@@ -141,7 +153,7 @@ class VoteHandler
             $this->electCandidate($candidate);
         }
 
-        $this->logger->info("Candidate checking complete. Someone was elected: $elected");
+        $this->logger->info(('Candidate checking complete. Elected: ' . count($candidatesToElect)));
 
         return $elected;
     }
@@ -158,12 +170,13 @@ class VoteHandler
      */
     protected function allocateVotes(Ballot $ballot, float $multiplier = 1.0, float $divisor = 1.0): Ballot
     {
-        $weight = $ballot->setWeight(($ballot->getWeight() * $multiplier) / $divisor);
+        $currentWeight = $ballot->getWeight();
+        $weight = $ballot->setWeight(($currentWeight * $multiplier) / $divisor);
         $candidate = $ballot->getNextChoice();
 
         // TODO: Check if candidate is withdrawn
 
-        $this->logger->debug("Allocating vote of weight $weight to $candidate", array(
+        $this->logger->debug("Allocating vote of weight $weight to $candidate. Previous weight: $currentWeight", array(
             'ballot' => $ballot,
         ));
 
@@ -171,6 +184,13 @@ class VoteHandler
             $this->election->getCandidate($candidate)->addVotes($weight);
             $ballot->incrementLevelUsed();
             $this->logger->debug('Vote added to candidate');
+
+            // If the candidate is no longer running due to being defeated or
+            // elected then we re-allocate their vote again.
+            if (!in_array($candidate, $this->election->getActiveCandidateIds()))
+            {
+                $this->allocateVotes($ballot);
+            }
         }
 
         return $ballot;
@@ -190,11 +210,7 @@ class VoteHandler
         $totalVotes = $candidate->getVotes();
         $candidateId = $candidate->getId();
 
-        $this->logger->info('Transfering surplus votes', array(
-            'surplus' => $surplus,
-            'candidate' => $candidate,
-            'totalVotes' => $totalVotes,
-        ));
+        $this->logger->info('Transfering surplus votes');
 
         foreach ($this->ballots as $i => $ballot) {
             if ($ballot->getLastChoice() == $candidateId) {
@@ -217,10 +233,9 @@ class VoteHandler
     {
         $candidateId = $candidate->getId();
 
-        $this->logger->info('Transfering votes from eliminated candidate', array(
-            'votes' => $candidate->getVotes(),
-            'candidate' => $candidate,
-        ));
+        $votes = $candidate->getVotes();
+
+        $this->logger->info("Transfering votes from eliminated candidate ($candidate) with $votes votes");
 
         foreach ($this->ballots as $i => $ballot) {
             if ($ballot->getLastChoice() == $candidateId) {
@@ -242,16 +257,19 @@ class VoteHandler
             throw new VotingException("We shouldn't be electing someone who hasn't met the quota");
         }
 
-        $this->logger->notice('Electing a candidate', array(
-            'candidate' => $candidate,
-        ));
+        $this->logger->notice("Electing a candidate: $candidate");
 
         $candidate->setState(Candidate::ELECTED);
         ++$this->electedCandidates;
 
         if ($this->electedCandidates < $this->election->getWinnersCount()) {
             $surplus = $candidate->getVotes() - $this->quota;
-            $this->transferSurplusVotes($surplus, $candidate);
+            if ($surplus > 0) {
+                $this->transferSurplusVotes($surplus, $candidate);
+            } else {
+                $this->logger->notice("No surplus votes from $candidate to reallocate");
+            }
+
         }
 
         return;
@@ -274,9 +292,7 @@ class VoteHandler
         $minimumCandidates = $this->getLowestCandidates($candidates);
 
         foreach ($minimumCandidates as $minimumCandidate) {
-            $this->logger->notice('Eliminating a candidate', array(
-                'minimumCandidate' => $minimumCandidate,
-            ));
+            $this->logger->notice("Eliminating a candidate: $minimumCandidate");
 
             $this->transferEliminatedVotes($minimumCandidate);
             $minimumCandidate->setState(Candidate::DEFEATED);
@@ -296,11 +312,11 @@ class VoteHandler
      */
     public function getLowestCandidates(array $candidates): array
     {
-        $minimum = 0;
+        $minimum = count($this->election->getBallots());
         $minimumCandidates = [];
 
         foreach ($candidates as $i => $candidate) {
-            if ($candidate->getVotes() > $minimum) {
+            if ($candidate->getVotes() < $minimum) {
                 $minimum = $candidate->getVotes();
                 unset($minimumCandidates);
                 $minimumCandidates[] = $candidate;
@@ -309,9 +325,9 @@ class VoteHandler
             }
         }
 
-        $this->logger->info('Calculated lowest candidates', array(
-            'minimumCandidates' => $minimumCandidates,
-        ));
+        $count = count($minimumCandidates);
+
+        $this->logger->info("Calculated the joint lowest candidates ($count)");
 
         return $minimumCandidates;
     }
@@ -332,9 +348,9 @@ class VoteHandler
 
         $count = count($this->rejectedBallots);
 
-        $this->logger->notice("Found $count rejected ballots", array(
-            'ballots' => $this->rejectedBallots,
-        ));
+        $this->logger->notice("Found $count rejected ballots");
+
+        $this->validBallots = $this->validBallots - $count;
 
         return $count;
     }
@@ -357,18 +373,16 @@ class VoteHandler
 
             foreach ($ballot->getRanking() as $i => $candidate) {
                 if (!in_array($candidate, $candidateIds)) {
-                    $this->logger->debug('Invalid ballot - invalid candidate', array(
-                        'ballot' => $ballot,
-                        'candidate' => $candidate,
-                        'candidates' => $candidateIds,
-                    ));
+                    $this->logger->debug('Invalid ballot - invalid candidate');
 
                     return false;
                 }
             }
         }
 
-        $this->logger->debug('Ballot is valid');
+        // TODO: Check for candidates multiple times on the same ballot paper
+
+        $this->logger->debug('Ballot is valid', ['ballot' => $ballot]);
 
         return true;
     }
@@ -381,12 +395,12 @@ class VoteHandler
     public function getQuota(): int
     {
         $quota = floor(
-            ($this->election->getNumBallots() /
+            ($this->validBallots /
                 ($this->election->getWinnersCount() + 1)
             )
             + 1);
 
-        $this->logger->info("Quota set: $quota");
+        $this->logger->info(sprintf("Quota set at %d based on %d winners and %d valid ballots", $quota, $this->election->getWinnersCount(), $this->validBallots));
 
         return $quota;
     }
