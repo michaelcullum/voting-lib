@@ -334,8 +334,6 @@ class VoteHandler
             }
         }
 
-        $count = count($minimumCandidates);
-
         return $minimumCandidates;
     }
 
