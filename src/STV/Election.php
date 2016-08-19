@@ -79,6 +79,17 @@ class Election
         return $this->getStateCandidates(Candidate::RUNNING);
     }
 
+    public function getActiveCandidateIds(): array
+    {
+        $ids = [];
+
+        foreach ($this->getActiveCandidates() as $i => $candidate) {
+            $ids[] = $candidate->getId();
+        }
+
+        return $ids;
+    }
+
     /**
      * Get an array of candidates elected.
      *
