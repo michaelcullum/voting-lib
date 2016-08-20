@@ -226,8 +226,6 @@ class ElectionRunner
         $weight = $ballot->setWeight(($currentWeight * $multiplier) / $divisor);
         $candidate = $ballot->getNextChoice();
 
-        // TODO: Check if candidate is withdrawn
-
         $this->logger->debug("Allocating vote of weight $weight to $candidate. Previous weight: $currentWeight", array(
             'ballot' => $ballot,
         ));
