@@ -365,7 +365,6 @@ class ElectionRunner
             } else {
                 $this->logger->notice("No surplus votes from $candidate to reallocate");
             }
-
         }
 
         return;
