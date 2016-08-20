@@ -41,35 +41,35 @@ class ElectionRunner
      *
      * @var int
      */
-    protected $quota;
+    public $quota;
 
     /**
      * Number of candidates elected so far.
      *
      * @var int
      */
-    protected $electedCandidates;
+    public $electedCandidates;
 
     /**
      * Invalid ballots.
      *
      * @var \MichaelC\Voting\STV\Ballot[]
      */
-    protected $rejectedBallots;
+    public $rejectedBallots;
 
     /**
      * Number of valid ballots
      *
      * @var int
      */
-    protected $validBallots;
+    public $validBallots;
 
     /**
      * Number of winners to still be elected (at current stage)
      *
      * @var int
      */
-    protected $candidatesToElect;
+    public $candidatesToElect;
 
     /**
      * Constructor.
@@ -100,7 +100,7 @@ class ElectionRunner
         // Reject invalid ballots, then calculate the quota based on remaining valid ballots
         // p. 46(3) and p 47
         $this->rejectInvalidBallots();
-        $this->quota = $this->getQuota();
+        $this->setQuota();
 
         // First step of standard allocation of ballots
         // p. 46(1) and 46(2)
@@ -459,14 +459,18 @@ class ElectionRunner
      */
     public function checkBallotValidity(Ballot $ballot): bool
     {
-        if (count($ballot->getRanking()) > $this->election->getCandidateCount()) {
+        $ranking = $ballot->getRanking();
+
+        if (count($ranking) > $this->election->getCandidateCount()) {
             $this->logger->debug('Invalid ballot - number of candidates', ['ballot' => $ballot]);
 
+            return false;
+        } elseif (count($ranking) !== count(array_unique($ranking))) {
             return false;
         } else {
             $candidateIds = $this->election->getCandidateIds();
 
-            foreach ($ballot->getRanking() as $i => $candidate) {
+            foreach ($ranking as $i => $candidate) {
                 if (!in_array($candidate, $candidateIds)) {
                     $this->logger->debug('Invalid ballot - invalid candidate');
 
@@ -510,18 +514,20 @@ class ElectionRunner
      * Get the quota to win.
      * p. 47
      *
+     * TODO: Move this out of this method and use params/args
+     *
      * @return int
      */
-    public function getQuota(): int
+    public function setQuota(): int
     {
-        $quota = floor(
+        $this->quota = floor(
             ($this->validBallots /
                 ($this->election->getWinnersCount() + 1)
             ) // p. 47 (1)
             + 1); // p. 47 (2)
 
-        $this->logger->info(sprintf("Quota set at %d based on %d winners and %d valid ballots", $quota, $this->election->getWinnersCount(), $this->validBallots));
+        $this->logger->info(sprintf("Quota set at %d based on %d winners and %d valid ballots", $this->quota, $this->election->getWinnersCount(), $this->validBallots));
 
-        return $quota;
+        return $this->quota;
     }
 }
