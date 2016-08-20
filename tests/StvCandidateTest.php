@@ -3,6 +3,7 @@
 namespace Tests\Michaelc\Voting;
 
 use Michaelc\Voting\STV\Candidate;
+use Michaelc\Voting\STV\ElectionFactory;
 
 class StvCandidateTest extends \PHPUnit_Framework_TestCase
 {
@@ -42,5 +43,15 @@ class StvCandidateTest extends \PHPUnit_Framework_TestCase
 
         $candidate->addVotes(0.11112);
         $this->assertEquals($candidate->getVotes(), 4.11112);
+    }
+
+    public function testCandidateFactory()
+    {
+        $candidates = ['John', 'Finch', 'Lionel', 'Semaine', 'Root'];
+
+        $candidatesCollection = ElectionFactory::createCandidateCollection($candidates);
+
+        $this->assertCount(5, $candidatesCollection);
+        $this->assertInstanceOf(Candidate::class, $candidatesCollection[0]);
     }
 }
