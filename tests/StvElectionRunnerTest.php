@@ -26,12 +26,16 @@ class StvElectionRunnerTest extends \PHPUnit_Framework_TestCase
             $this->assertCount($i, $result);
 
             // Candidate 1 will get 8 votes in the first round so should always be elected with a quota of 8 or lower
-            if ($handler->quota <= 8) {
+            if ($handler->getQuota() <= 8) {
                 $this->assertContains($election->getCandidate(1), $result);
             }
 
+            $this->assertGreaterThan(1, $handler->getQuota());
+
             // 15 can never win
             $this->assertNotContains($election->getCandidate(15), $result);
+
+            $this->assertNotEmpty($handler->getSteps());
 
             unset($election, $handler, $result);
         }

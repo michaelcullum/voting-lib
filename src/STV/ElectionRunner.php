@@ -41,7 +41,7 @@ class ElectionRunner
      *
      * @var int
      */
-    public $quota;
+    protected $quota;
 
     /**
      * Number of candidates elected so far.
@@ -72,6 +72,13 @@ class ElectionRunner
     public $candidatesToElect;
 
     /**
+     * Array of each stage of the election and the vote totals of each candidate
+     *
+     * @var array
+     */
+    protected $steps;
+
+    /**
      * Constructor.
      *
      * @param Election $election
@@ -85,6 +92,7 @@ class ElectionRunner
         $this->rejectedBallots = [];
         $this->candidatesToElect = $this->election->getWinnersCount();
         $this->validBallots = $this->election->getNumBallots();
+        $this->steps = [];
     }
 
     /**
@@ -139,6 +147,8 @@ class ElectionRunner
             ['candidatesStatus' => $this->election->getCandidatesStatus()]
         );
 
+        $this->steps[1] = $this->election->getCandidatesStatus();
+
         return;
     }
 
@@ -165,6 +175,8 @@ class ElectionRunner
             $this->logger->notice("Step $counter complete",
                 ['candidatesStatus' => $this->election->getCandidatesStatus()]
             );
+
+            $this->steps[$counter] = $this->election->getCandidatesStatus();
         }
 
         return $candidates;
@@ -522,5 +534,26 @@ class ElectionRunner
         $this->logger->info(sprintf('Quota set at %d based on %d winners and %d valid ballots', $this->quota, $this->election->getWinnersCount(), $this->validBallots));
 
         return $this->quota;
+    }
+
+    /**
+     * Return the quota for the election
+     *
+     * @return int
+     */
+    public function getQuota(): int
+    {
+        return $this->quota;
+    }
+
+    /**
+     * Gets an array of the state of all candidates at the end of each
+     * phase/step
+     *
+     * @return array
+     */
+    public function getSteps(): array
+    {
+        return $this->steps;
     }
 }
