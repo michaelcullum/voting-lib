@@ -6,6 +6,13 @@ use Psr\Log\LoggerInterface as Logger;
 use Michaelc\Voting\Exception\VotingLogicException as LogicException;
 use Michaelc\Voting\Exception\VotingRuntimeException as RuntimeException;
 
+/**
+ * This class will calculate the outcome of an election
+ *
+ * References throughout are provided as to what is going on.
+ * It follows a system similar to Scottish STV and all paragraph
+ * references are for: http://www.legislation.gov.uk/sdsi/2011/9780111014639/pdfs/sdsi_9780111014639_en.pdf
+ */
 class ElectionRunner
 {
     /**
@@ -90,14 +97,23 @@ class ElectionRunner
         $this->logger->notice('Starting to run an election');
         $this->logger->notice(sprintf('There are %d candidates, %d ballots and to be %d winners', $this->election->getCandidateCount(), $this->validBallots, $this->election->getWinnersCount()));
 
+        // Reject invalid ballots, then calculate the quota based on remaining valid ballots
+        // p. 46(3)
+        // p 47
         $this->rejectInvalidBallots();
         $this->quota = $this->getQuota();
 
+        // First step of standard allocation of ballots
+        // p. 46(1) and 46(2)
         $this->firstStep();
 
         $candidates = $this->election->getActiveCandidates();
 
+        // All the re-allocation rounds until we have filled all seats or
+        // have the same number of seats left to fill and candidates remaining
+        // (then elect them)
         $this->processReallocationRounds($candidates);
+        // p. 53
         $this->reallocateRemainingVotes($candidates);
 
         $this->logger->notice('Election complete');
@@ -107,6 +123,7 @@ class ElectionRunner
 
     /**
      * Perform the initial vote allocation.
+     * p. 46
      *
      * @return
      */
@@ -114,6 +131,7 @@ class ElectionRunner
     {
         $this->logger->info('Beginning the first step');
 
+        // Allocate all the ballots
         foreach ($this->ballots as $i => $ballot) {
             $this->allocateVotes($ballot);
         }
@@ -137,6 +155,7 @@ class ElectionRunner
         $counter = 1;
         while (($this->candidatesToElect > 0) && ($this->election->getActiveCandidateCount() > $this->candidatesToElect)) {
             if (!$this->checkCandidates($candidates)) {
+                // p. 51(1)
                 $this->eliminateCandidates($candidates);
             }
 
@@ -181,12 +200,21 @@ class ElectionRunner
 
             $this->logger->debug("Checking candidate ($candidate) with $votes", ['candidate' => $candidate]);
 
+            // p. 48(1)
+            // Immediately elect a candidate if they hit the quota
+            // We check all the candidates, see who has hit the quota,
+            // add them to a queue, then elect those who have hit the quota to prevent
+            // surplus allocations pushing a candidate over the quota early.
             if ($votes >= $this->quota) {
                 $candidatesToElect[] = $candidate;
                 $elected = true;
             }
         }
 
+        // TODO: Put this in a try, and catch the RuntimeError.
+        // Then sort by the surplus, and fill available seats.
+        // If have same surplus then select randomly (Contary to Scottish STV)
+        // p. 50
         $this->electCandidates($candidatesToElect);
 
         $this->logger->info(('Candidate checking complete. Elected: ' . count($candidatesToElect)));
@@ -203,6 +231,11 @@ class ElectionRunner
      */
     protected function electCandidates(array $candidates)
     {
+        if ($this->candidatesToElect < count($candidates))
+        {
+            throw new RuntimeException('Cannot elect candidate as not enough seats to fill');
+        }
+
         foreach ($candidates as $i => $candidate) {
             $this->electCandidate($candidate);
         }
@@ -212,6 +245,7 @@ class ElectionRunner
 
     /**
      * Allocate the next votes from a Ballot.
+     * p. 49
      *
      * @param Ballot $ballot     The ballot to allocate the votes from
      * @param float  $multiplier Number to multiply the weight by (surplus)
@@ -223,14 +257,25 @@ class ElectionRunner
     protected function allocateVotes(Ballot $ballot, float $multiplier = 1.0, float $divisor = 1.0): Ballot
     {
         $currentWeight = $ballot->getWeight();
+        // p. 49(3)
+        // "A divided by B" Where A = the value which is calculated
+        // by multiplying the surplus of the transferring candidate
+        // by the value of the ballot paper when received by that candidate; and
+        // B = the total number of votes credited to that candidate
         $weight = $ballot->setWeight(($currentWeight * $multiplier) / $divisor);
+
+        // Get the next candidate on their ballot paper which has not been assigned
+        // a vote this could be the first candidate in round 1
         $candidate = $ballot->getNextChoice();
 
         $this->logger->debug("Allocating vote of weight $weight to $candidate. Previous weight: $currentWeight", array(
             'ballot' => $ballot,
         ));
 
+        // Check there was a next candidate, if only x candidates where listed where
+        // x < the number of candidates standing this will occur.
         if ($candidate !== null) {
+            // Allocate those surplus votes. p. 49(1) and p. 49(2)
             $this->election->getCandidate($candidate)->addVotes($weight);
             $ballot->incrementLevelUsed();
             $this->logger->debug('Vote added to candidate');
@@ -273,6 +318,7 @@ class ElectionRunner
 
     /**
      * Transfer the votes from one eliminated candidate to other candidates.
+     * p. 51(2)
      *
      * @param Candidate $candidate Candidate being eliminated to transfer
      *                             the votes from
@@ -287,6 +333,9 @@ class ElectionRunner
 
         $this->logger->info("Transfering votes from eliminated candidate ($candidate) with $votes votes");
 
+        // p. 51(2)(a) - Sort into next preference candidates
+        // p. 51(3) - Add votes to candidates
+        // p. 51(4) - Use previous weighting
         foreach ($this->ballots as $i => $ballot) {
             if ($ballot->getLastChoice() == $candidateId) {
                 $this->allocateVotes($ballot);
@@ -325,6 +374,7 @@ class ElectionRunner
     /**
      * Eliminate the candidate with the lowest number of votes
      * and reallocated their votes.
+     * p. 51
      *
      * @param Candidate[] $candidates Array of active candidates
      *
@@ -335,6 +385,9 @@ class ElectionRunner
         $minimumCandidates = $this->getLowestCandidates($candidates);
         $count = count($minimumCandidates);
 
+        // p. 52(2)(b) - the returning officer shall decide, by lot, which of those
+        // candidates is to be excluded.
+        // We do not look back on previous rounds at all as per p. 52(2)(a)
         $minimumCandidate = $minimumCandidates[(array_rand($minimumCandidates))];
 
         $this->logger->notice(sprintf("There were %d joint lowest candidates,
@@ -347,7 +400,9 @@ class ElectionRunner
     }
 
     /**
-     * Get candidates with the lowest number of votes.
+     * Get candidates with the lowest number of votes
+     * p. 51
+     * p. 52(1)
      *
      * @param Candidate[] $candidates
      *                                                     Array of active candidates
@@ -376,6 +431,7 @@ class ElectionRunner
 
     /**
      * Reject any invalid ballots.
+     * p. 46(3)
      *
      * @return int Number of rejected ballots
      */
@@ -431,6 +487,7 @@ class ElectionRunner
 
     /**
      * Reallocate any remaining votes
+     * p. 53
      *
      * @param  Candidate[] $candidates All remaining candidates to elect
      * @return
@@ -443,7 +500,7 @@ class ElectionRunner
 
             if ($this->candidatesToElect < count($candidates))
             {
-                throw new LogicException('Cannot elect an un-eliminated but remaining candidate as no more seats to fill');
+                throw new LogicException('Cannot elect candidate as no more seats to fill');
             }
 
             $this->electCandidates($candidates);
@@ -454,6 +511,7 @@ class ElectionRunner
 
     /**
      * Get the quota to win.
+     * p. 47
      *
      * @return int
      */
@@ -462,8 +520,8 @@ class ElectionRunner
         $quota = floor(
             ($this->validBallots /
                 ($this->election->getWinnersCount() + 1)
-            )
-            + 1);
+            ) // p. 47 (1)
+            + 1); // p. 47 (2)
 
         $this->logger->info(sprintf("Quota set at %d based on %d winners and %d valid ballots", $quota, $this->election->getWinnersCount(), $this->validBallots));
 
