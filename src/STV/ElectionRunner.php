@@ -6,8 +6,15 @@ use Psr\Log\LoggerInterface as Logger;
 use Michaelc\Voting\Exception\VotingLogicException as LogicException;
 use Michaelc\Voting\Exception\VotingRuntimeException as RuntimeException;
 
-class VoteHandler
+class ElectionRunner
 {
+    /**
+     * Logger.
+     *
+     * @var \Psr\Log\LoggerInterface
+     */
+    protected $logger;
+
     /**
      * Election object.
      *
@@ -44,14 +51,17 @@ class VoteHandler
     protected $rejectedBallots;
 
     /**
-     * Logger.
+     * Number of valid ballots
      *
-     * @var \Psr\Log\LoggerInterface
+     * @var int
      */
-    protected $logger;
-
     protected $validBallots;
 
+    /**
+     * Number of winners to still be elected (at current stage)
+     *
+     * @var int
+     */
     protected $candidatesToElect;
 
     /**
@@ -63,17 +73,17 @@ class VoteHandler
     {
         $this->logger = $logger;
         $this->election = $election;
+
         $this->ballots = $this->election->getBallots();
         $this->rejectedBallots = [];
         $this->candidatesToElect = $this->election->getWinnersCount();
-
         $this->validBallots = $this->election->getNumBallots();
     }
 
     /**
      * Run the election.
      *
-     * @return \MichaelC\Voting\STV\Candidate[] Winning candidates
+     * @return Candidate[] Winning candidates
      */
     public function run()
     {
@@ -87,23 +97,8 @@ class VoteHandler
 
         $candidates = $this->election->getActiveCandidates();
 
-        while (($this->candidatesToElect > 0) && ($this->election->getActiveCandidateCount() > $this->candidatesToElect)) {
-            if (!$this->checkCandidates($candidates)) {
-                $this->eliminateCandidates($candidates);
-            }
-
-            $candidates = $this->election->getActiveCandidates();
-        }
-
-        if (!empty($candidates))
-        {
-            $this->logger->info('All votes re-allocated. Electing all remaining candidates');
-
-            foreach ($candidates as $i => $candidate) {
-                $this->electCandidate($candidate);
-            }
-        }
-
+        $this->processReallocationRounds($candidates);
+        $this->reallocateRemainingVotes($candidates);
 
         $this->logger->notice('Election complete');
 
@@ -120,12 +115,10 @@ class VoteHandler
         $this->logger->info('Beginning the first step');
 
         foreach ($this->ballots as $i => $ballot) {
-            $this->logger->debug("Processing ballot $i in stage 1");
-
             $this->allocateVotes($ballot);
         }
 
-        $this->logger->notice('First step complete',
+        $this->logger->notice('Step 1 complete',
             ['candidatesStatus' => $this->election->getCandidatesStatus()]
         );
 
@@ -133,9 +126,36 @@ class VoteHandler
     }
 
     /**
+     * Process re-allocation rounds (elimination re-allocations and surplus re-allocations)
+     *
+     * @param  Candidate[] $candidates All active candidates to elect
+     *
+     * @return Candidate[]
+     */
+    protected function processReallocationRounds(array &$candidates): array
+    {
+        $counter = 1;
+        while (($this->candidatesToElect > 0) && ($this->election->getActiveCandidateCount() > $this->candidatesToElect)) {
+            if (!$this->checkCandidates($candidates)) {
+                $this->eliminateCandidates($candidates);
+            }
+
+            $candidates = $this->election->getActiveCandidates();
+
+            $counter++;
+
+            $this->logger->notice("Step $counter complete",
+                ['candidatesStatus' => $this->election->getCandidatesStatus()]
+            );
+        }
+
+        return $candidates;
+    }
+
+    /**
      * Check if any candidates have reached the quota and can be elected.
      *
-     * @param array $candidates Array of active candidates to check
+     * @param Candidate[] $candidates Array of active candidates to check
      *
      * @return bool Whether any candidates were changed to elected
      */
@@ -152,6 +172,11 @@ class VoteHandler
         }
 
         foreach ($candidates as $i => $candidate) {
+            if ($candidate->getState() !== Candidate::RUNNING)
+            {
+                throw new LogicException('Candidate is not marked as not running but has not been excluded');
+            }
+
             $votes = $candidate->getVotes();
 
             $this->logger->debug("Checking candidate ($candidate) with $votes", ['candidate' => $candidate]);
@@ -162,13 +187,27 @@ class VoteHandler
             }
         }
 
-        foreach ($candidatesToElect as $i => $candidate) {
-            $this->electCandidate($candidate);
-        }
+        $this->electCandidates($candidatesToElect);
 
         $this->logger->info(('Candidate checking complete. Elected: ' . count($candidatesToElect)));
 
         return $elected;
+    }
+
+    /**
+     * Elect an array of candidates
+     *
+     * @param  Candidate[] $candidates Array of candidates to elect
+     *
+     * @return
+     */
+    protected function electCandidates(array $candidates)
+    {
+        foreach ($candidates as $i => $candidate) {
+            $this->electCandidate($candidate);
+        }
+
+        return;
     }
 
     /**
@@ -262,7 +301,7 @@ class VoteHandler
     /**
      * Elect a candidate after they've passed the threshold.
      *
-     * @param \Michaelc\Voting\STV\Candidate $candidate
+     * @param Candidate $candidate
      */
     protected function electCandidate(Candidate $candidate)
     {
@@ -289,7 +328,7 @@ class VoteHandler
      * Eliminate the candidate with the lowest number of votes
      * and reallocated their votes.
      *
-     * @param \Michaelc\Voting\STV\Candidate[] $candidates Array of active candidates
+     * @param Candidate[] $candidates Array of active candidates
      *
      * @return int Number of candidates eliminated
      */
@@ -312,10 +351,10 @@ class VoteHandler
     /**
      * Get candidates with the lowest number of votes.
      *
-     * @param \Michaelc\Voting\STV\Candidate[] $candidates
+     * @param Candidate[] $candidates
      *                                                     Array of active candidates
      *
-     * @return \Michaelc\Voting\STV\Candidate[]
+     * @return Candidate[]
      *                                          Candidates with lowest score
      */
     public function getLowestCandidates(array $candidates): array
@@ -390,6 +429,29 @@ class VoteHandler
         $this->logger->debug('Ballot is valid', ['ballot' => $ballot]);
 
         return true;
+    }
+
+    /**
+     * Reallocate any remaining votes
+     *
+     * @param  Candidate[] $candidates All remaining candidates to elect
+     * @return
+     */
+    protected function reallocateRemainingVotes(array &$candidates)
+    {
+        if (!empty($candidates))
+        {
+            $this->logger->info('All votes re-allocated. Electing all remaining candidates');
+
+            if ($this->candidatesToElect < count($candidates))
+            {
+                throw new LogicException('Cannot elect an un-eliminated but remaining candidate as no more seats to fill');
+            }
+
+            $this->electCandidates($candidates);
+        }
+
+        return;
     }
 
     /**

@@ -5,7 +5,7 @@ namespace Tests\Michaelc\Voting;
 use Michaelc\Voting\STV\Ballot;
 use Michaelc\Voting\STV\Candidate;
 use Michaelc\Voting\STV\Election;
-use Michaelc\Voting\STV\VoteHandler;
+use Michaelc\Voting\STV\ElectionRunner;
 use Psr\Log\LoggerInterface as Logger;
 use Tests\Michaelc\Voting\StvElectionTest;
 
@@ -17,7 +17,7 @@ class StvElectionRunnerTest extends \PHPUnit_Framework_TestCase
             $election = StvElectionTest::getSampleElection($i);
             $logger = $this->createMock(Logger::class);
 
-            $handler = new VoteHandler($election, $logger);
+            $handler = new ElectionRunner($election, $logger);
             $this->assertNotNull($handler->run());
             unset($election, $handler);
         }
@@ -28,9 +28,9 @@ class StvElectionRunnerTest extends \PHPUnit_Framework_TestCase
         $election = StvElectionTest::getSampleElection();
         $logger = $this->createMock(Logger::class);
 
-        $handler = new VoteHandler($election, $logger);
+        $handler = new ElectionRunner($election, $logger);
 
-        $method = new \ReflectionMethod('\Michaelc\Voting\STV\VoteHandler', 'checkBallotValidity');
+        $method = new \ReflectionMethod('\Michaelc\Voting\STV\ElectionRunner', 'checkBallotValidity');
 
         $method->setAccessible(TRUE);
         $ballot = new Ballot([4, 5, 8]);
