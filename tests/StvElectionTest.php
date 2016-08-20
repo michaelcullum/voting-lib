@@ -5,6 +5,7 @@ namespace Tests\Michaelc\Voting;
 use Michaelc\Voting\STV\Ballot;
 use Michaelc\Voting\STV\Candidate;
 use Michaelc\Voting\STV\Election;
+use Michaelc\Voting\STV\ElectionFactory;
 
 class StvElectionTest extends \PHPUnit_Framework_TestCase
 {
@@ -101,5 +102,25 @@ class StvElectionTest extends \PHPUnit_Framework_TestCase
         $election = new Election($candidates, $ballots, $winners);
 
         return $election;
+    }
+
+    public function testCandidateBallotCollectionCreator()
+    {
+        $candidates = ['Gibbs', 'Kate', 'Dinozzo', 'McGee', 'Bishop', 'Ziva'];
+
+        $rankings = [];
+        $rankings[] = ['Gibbs', 'Kate', 'Dinozzo'];
+        $rankings[] = ['Dinozzo', 'McGee', 'Bishop', 'Kate', 'Ziva','Gibbs'];
+        $rankings[] = ['Kate', 'Dinozzo', 'McGee', 'Gibbs', 'Bishop', 'Ziva'];
+
+        $collections = ElectionFactory::createCandidateBallotCollection($candidates,$rankings);
+
+        $this->assertCount(6, $collections['candidates']);
+        $this->assertCount(3, $collections['ballots']);
+        $this->assertContainsOnlyInstancesOf(Candidate::class, $collections['candidates']);
+        $this->assertContainsOnlyInstancesOf(Ballot::class, $collections['ballots']);
+        $this->assertCount(3, $collections['ballots'][0]->getRanking());
+        $this->assertEquals(1, $collections['ballots'][0]->getRanking()[1]);
+        $this->assertNotContains(4, $collections['ballots'][0]->getRanking());
     }
 }

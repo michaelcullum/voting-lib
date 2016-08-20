@@ -43,13 +43,13 @@ class ElectionFactory
 			$candidateMatchup[$name] = $i;
 		}
 
-		foreach ($rankings as $ranking) {
-			array_walk($ranking, function(&$value) {
+		foreach ($rankings as &$ranking) {
+			array_walk($ranking, function (&$value, $key, $candidateMatchup) {
 			    $value = $candidateMatchup[$value];
-			});
+			}, $candidateMatchup);
 		}
 
-		$ballotCollection = $this->createBallotCollection($rankings);
+		$ballotCollection = self::createBallotCollection($rankings);
 
 		return ['ballots' => $ballotCollection, 'candidates' => $candidateCollection];
 	}
@@ -57,10 +57,10 @@ class ElectionFactory
 	public static function createElection(array $candidates, array $rankings, int $winnerCount, bool $ids = true): Election
 	{
 		if ($ids) {
-			$candidateCollection = $this->createCandidateSet($candidates);
-			$ballotCollection = $this->createBallotCollection($rankings);
+			$candidateCollection = self::createCandidateSet($candidates);
+			$ballotCollection = self::createBallotCollection($rankings);
 		} else {
-			$collections = $this->createCandidateBallotCollection($candidates, $rankings);
+			$collections = self::createCandidateBallotCollection($candidates, $rankings);
 			$candidates = $collections['candidates'];
 			$ballots = $collections['ballots'];
 		}
