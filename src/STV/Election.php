@@ -2,7 +2,9 @@
 
 namespace Michaelc\Voting\STV;
 
-class Election
+use Michaelc\Voting\Election as ElectionInterface;
+
+class Election implements ElectionInterface
 {
     /**
      * Count of candidates in election.
@@ -35,11 +37,11 @@ class Election
     /**
      * Constructor.
      *
-     * @param int   $winnersCount Number of winners to allocate
      * @param array $candidates   Array of candidates competing
      * @param array $ballots      Array of all ballots cast in election
+     * @param int   $winnersCount Number of winners to allocate
      */
-    public function __construct(int $winnersCount, array $candidates, array $ballots)
+    public function __construct(array $candidates, array $ballots, int $winnersCount = 2)
     {
         $this->winnersCount = $winnersCount;
         $this->candidates = $candidates;
@@ -54,7 +56,7 @@ class Election
      *
      * @return \Michaelc\Voting\STV\Candidate
      */
-    public function getCandidate(int $id): Candidate
+    public function getCandidate(int $id): CandidateInterface
     {
         return $this->candidates[$id];
     }

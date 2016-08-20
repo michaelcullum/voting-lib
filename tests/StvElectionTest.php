@@ -22,7 +22,7 @@ class StvElectionTest extends \PHPUnit_Framework_TestCase
         $ballots[] = new Ballot([4, 5, 6]);
         $ballots[] = new Ballot([1, 2, 3]);
 
-        $election = new Election($winners, $candidates, $ballots);
+        $election = new Election($candidates, $ballots, $winners);
 
         $this->assertEquals($candidates[3], $election->getCandidate(3));
         $this->assertEquals($candidateCount, $election->getCandidateCount());
@@ -98,7 +98,7 @@ class StvElectionTest extends \PHPUnit_Framework_TestCase
 
         $ballots = StvBallotTest::getBallotSample();
 
-        $election = new Election($winners, $candidates, $ballots);
+        $election = new Election($candidates, $ballots, $winners);
 
         return $election;
     }
