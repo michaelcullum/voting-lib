@@ -4,16 +4,14 @@ namespace Tests\Michaelc\Voting;
 
 use Michaelc\Voting\STV\Ballot;
 use Michaelc\Voting\STV\Candidate;
-use Michaelc\Voting\STV\Election;
 use Michaelc\Voting\STV\ElectionRunner;
 use Psr\Log\LoggerInterface as Logger;
-use Tests\Michaelc\Voting\StvElectionTest;
 
 class StvElectionRunnerTest extends \PHPUnit_Framework_TestCase
 {
     public function testElectionRun()
     {
-        for ($i=1; $i < 15; $i++) {
+        for ($i = 1; $i < 15; ++$i) {
             $election = StvElectionTest::getSampleElection($i);
             $logger = $this->createMock(Logger::class);
             //C$logger = new TestLogger();
@@ -28,8 +26,7 @@ class StvElectionRunnerTest extends \PHPUnit_Framework_TestCase
             $this->assertCount($i, $result);
 
             // Candidate 1 will get 8 votes in the first round so should always be elected with a quota of 8 or lower
-            if ($handler->quota <= 8)
-            {
+            if ($handler->quota <= 8) {
                 $this->assertContains($election->getCandidate(1), $result);
             }
 
@@ -49,7 +46,7 @@ class StvElectionRunnerTest extends \PHPUnit_Framework_TestCase
 
         $method = new \ReflectionMethod('\Michaelc\Voting\STV\ElectionRunner', 'checkBallotValidity');
 
-        $method->setAccessible(TRUE);
+        $method->setAccessible(true);
         $ballot = new Ballot([4, 5, 8]);
         $this->assertTrue($method->invoke($handler, $ballot));
 

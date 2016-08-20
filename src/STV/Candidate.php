@@ -40,7 +40,7 @@ class Candidate
     }
 
     /**
-     * String representation of candidates
+     * String representation of candidates.
      *
      * @return string
      */

@@ -14,7 +14,7 @@ class StvCandidateTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($candidate->getVotes(), 0.0);
         $this->assertEquals($candidate->getState(), Candidate::RUNNING);
 
-        $this->assertEquals(((string) $candidate), "12"); // Testing __toString() method
+        $this->assertEquals(((string) $candidate), '12'); // Testing __toString() method
     }
 
     public function testCandidateStates()
