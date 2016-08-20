@@ -479,8 +479,6 @@ class ElectionRunner
             }
         }
 
-        // TODO: Check for candidates multiple times on the same ballot paper
-
         $this->logger->debug('Ballot is valid', ['ballot' => $ballot]);
 
         return true;
