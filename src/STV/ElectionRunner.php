@@ -469,25 +469,12 @@ class ElectionRunner
     {
         $ranking = $ballot->getRanking();
 
-        if (count($ranking) > $this->election->getCandidateCount()) {
-            $this->logger->debug('Invalid ballot - number of candidates', ['ballot' => $ballot]);
-
+        if (!$this->checkCandidateCountValidity($ranking) || !$this->checkBallotVoteDuplicationValidity($ranking) || !$this->checkAllBallotCandidatesValid($ranking))
+        {
             return false;
-        } elseif (count($ranking) !== count(array_unique($ranking))) {
-            return false;
-        } else {
-            $candidateIds = $this->election->getCandidateIds();
-
-            foreach ($ranking as $i => $candidate) {
-                if (!in_array($candidate, $candidateIds)) {
-                    $this->logger->debug('Invalid ballot - invalid candidate');
-
-                    return false;
-                }
-            }
         }
 
-        $this->logger->debug('Ballot is valid', ['ballot' => $ballot]);
+        $this->logger->debug('Ballot is valid');
 
         return true;
     }
@@ -555,5 +542,64 @@ class ElectionRunner
     public function getSteps(): array
     {
         return $this->steps;
+    }
+
+    /**
+     * Check that a ballot's ranking doesn't have more elements than
+     * we have candidates
+     *
+     * @param  array  $ranking Ballot ranking
+     *
+     * @return bool   False if invalid, True if valid
+     */
+    protected function checkCandidateCountValidity(array $ranking): bool
+    {
+        if (count($ranking) > $this->election->getCandidateCount()) {
+            $this->logger->debug('Invalid ballot - number of candidates');
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Check that a ballot doesn't duplicate votes for any candidates (where
+     * a candidate is listed twice in one ranking)
+     *
+     * @param  array  $ranking Ballot ranking
+     *
+     * @return bool   False if invalid, True if valid
+     */
+    protected function checkBallotVoteDuplicationValidity(array $ranking): bool
+    {
+        if (count($ranking) !== count(array_unique($ranking))) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Check that a ballot only contains candidate id numbers that are integers
+     * and correspond to valid candidates.
+     *
+     * @param  array  $ranking Ballot ranking
+     *
+     * @return bool   False if invalid, True if valid
+     */
+    protected function checkAllBallotCandidatesValid(array $ranking): bool
+    {
+        $candidateIds = $this->election->getCandidateIds();
+
+        foreach ($ranking as $candidate) {
+            if (!in_array($candidate, $candidateIds)) {
+                $this->logger->debug('Invalid ballot - invalid candidate');
+
+                return false;
+            }
+        }
+
+        return true;
     }
 }
