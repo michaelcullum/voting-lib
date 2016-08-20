@@ -21,7 +21,10 @@ class StvElectionRunnerTest extends \PHPUnit_Framework_TestCase
             $handler = new ElectionRunner($election, $logger);
             $result = $handler->run();
 
+            // Someone won
             $this->assertNotNull($result);
+
+            // Number of winners dicated = number of winners produced
             $this->assertCount($i, $result);
 
             // Candidate 1 will get 8 votes in the first round so should always be elected with a quota of 8 or lower
@@ -30,6 +33,7 @@ class StvElectionRunnerTest extends \PHPUnit_Framework_TestCase
                 $this->assertContains($election->getCandidate(1), $result);
             }
 
+            // 15 can never win
             $this->assertNotContains($election->getCandidate(15), $result);
 
             unset($election, $handler, $result);
