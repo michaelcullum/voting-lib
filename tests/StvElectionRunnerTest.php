@@ -13,10 +13,10 @@ class StvElectionRunnerTest extends \PHPUnit_Framework_TestCase
 {
     public function testElectionRun()
     {
-        for ($i=1; $i <= 15; $i++) {
+        for ($i=1; $i < 15; $i++) {
             $election = StvElectionTest::getSampleElection($i);
             $logger = $this->createMock(Logger::class);
-            //$logger = new TestLogger();
+            //C$logger = new TestLogger();
 
             $handler = new ElectionRunner($election, $logger);
             $result = $handler->run();
@@ -29,6 +29,8 @@ class StvElectionRunnerTest extends \PHPUnit_Framework_TestCase
             {
                 $this->assertContains($election->getCandidate(1), $result);
             }
+
+            $this->assertNotContains($election->getCandidate(15), $result);
 
             unset($election, $handler, $result);
         }
