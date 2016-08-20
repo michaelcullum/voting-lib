@@ -3,6 +3,7 @@
 namespace Michaelc\Voting\STV;
 
 use Michaelc\Voting\Election as ElectionInterface;
+use Michaelc\Voting\Candidate as CandidateInterface;
 
 class Election implements ElectionInterface
 {
