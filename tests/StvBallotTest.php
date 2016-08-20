@@ -129,9 +129,9 @@ class StvBallotTest extends \PHPUnit_Framework_TestCase
         // Identical vote 2
         $ballots[] = new Ballot([13, 12, 5, 10, 7, 6, 4, 2, 11, 9, 14, 15, 8, 3, 1]);
 
-        $ballots[] = new Ballot([20, 5, 10, 15]); // Invalid ballot
-        $ballots[] = new Ballot([19, 5, 5, 10, 15]); // Invalid ballot
-        $ballots[] = new Ballot([1, 6, 2, 12, 8, 15, 3, 7, 4, 13, 14, 9, 10, 12, 5, 11, 12]); // Invalid ballot
+        $ballots[] = new Ballot([19, 5, 10, 15]); // Invalid ballot (Non-existing candidate)
+        $ballots[] = new Ballot([3, 3, 4]); // Invalid ballot (Repeated candidate)
+        $ballots[] = new Ballot([1, 6, 2, 12, 8, 15, 3, 7, 4, 13, 14, 9, 10, 12, 5, 11, 12]); // Invalid ballot (Too many values)
 
         return $ballots;
     }
