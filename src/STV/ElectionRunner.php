@@ -98,8 +98,7 @@ class ElectionRunner
         $this->logger->notice(sprintf('There are %d candidates, %d ballots and to be %d winners', $this->election->getCandidateCount(), $this->validBallots, $this->election->getWinnersCount()));
 
         // Reject invalid ballots, then calculate the quota based on remaining valid ballots
-        // p. 46(3)
-        // p 47
+        // p. 46(3) and p 47
         $this->rejectInvalidBallots();
         $this->quota = $this->getQuota();
 
@@ -111,7 +110,7 @@ class ElectionRunner
 
         // All the re-allocation rounds until we have filled all seats or
         // have the same number of seats left to fill and candidates remaining
-        // (then elect them)
+        // (then elect them).
         $this->processReallocationRounds($candidates);
         // p. 53
         $this->reallocateRemainingVotes($candidates);
@@ -400,8 +399,7 @@ class ElectionRunner
 
     /**
      * Get candidates with the lowest number of votes
-     * p. 51
-     * p. 52(1)
+     * p. 51 and p. 52(1)
      *
      * @param Candidate[] $candidates
      *                                                     Array of active candidates
