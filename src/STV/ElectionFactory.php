@@ -5,10 +5,8 @@ namespace Michaelc\Voting\STV;
 use Psr\Log\LoggerInterface as Logger;
 use Michaelc\Voting\Exception\VotingLogicException as LogicException;
 use Michaelc\Voting\Exception\VotingRuntimeException as RuntimeException;
-use Michaelc\Voting\ElectionFactory as ElectionFactoryInterface;
-use Michaelc\Voting\Election as ElectionInterface;
 
-class ElectionFactory implements ElectionFactoryInterface
+class ElectionFactory
 {
 	public static function createBallotCollection(array $rankings): array
 	{
@@ -56,7 +54,7 @@ class ElectionFactory implements ElectionFactoryInterface
 		return ['ballots' => $ballotCollection, 'candidates' => $candidateCollection];
 	}
 
-	public static function createElection(array $candidates, array $rankings, int $winnerCount, bool $ids = true): ElectionInterface
+	public static function createElection(array $candidates, array $rankings, int $winnerCount, bool $ids = true): Election
 	{
 		if ($ids) {
 			$candidateCollection = $this->createCandidateSet($candidates);

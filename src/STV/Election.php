@@ -2,10 +2,7 @@
 
 namespace Michaelc\Voting\STV;
 
-use Michaelc\Voting\Election as ElectionInterface;
-use Michaelc\Voting\Candidate as CandidateInterface;
-
-class Election implements ElectionInterface
+class Election
 {
     /**
      * Count of candidates in election.
@@ -57,7 +54,7 @@ class Election implements ElectionInterface
      *
      * @return \Michaelc\Voting\STV\Candidate
      */
-    public function getCandidate(int $id): CandidateInterface
+    public function getCandidate(int $id): Candidate
     {
         return $this->candidates[$id];
     }

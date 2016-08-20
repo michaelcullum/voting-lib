@@ -2,9 +2,7 @@
 
 namespace Michaelc\Voting\STV;
 
-use Michaelc\Voting\Candidate as CandidateInterface;
-
-class Candidate implements CandidateInterface
+class Candidate
 {
     const ELECTED = 1;
     const RUNNING = 2;
