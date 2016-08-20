@@ -85,7 +85,7 @@ class Election
 
         $candidates = $this->getActiveCandidates();
 
-        foreach ($candidates as $i => $candidate) {
+        foreach ($candidates as $candidate) {
             $ids[] = $candidate->getId();
         }
 
@@ -151,7 +151,7 @@ class Election
     {
         $candidateIds = [];
 
-        foreach ($this->candidates as $i => $candidate) {
+        foreach ($this->candidates as $candidate) {
             $candidateIds[] = $candidate->getId();
         }
 
@@ -207,15 +207,15 @@ class Election
     {
         $candidates = [];
 
-        foreach ($this->getElectedCandidates() as $i => $candidate) {
+        foreach ($this->getElectedCandidates() as $candidate) {
             $candidates['elected'][] = $candidate->getId();
         }
 
-        foreach ($this->getActiveCandidates() as $i => $candidate) {
+        foreach ($this->getActiveCandidates() as $candidate) {
             $candidates['active'][] = [$candidate->getId(), $candidate->getVotes()];
         }
 
-        foreach ($this->getDefeatedCandidates() as $i => $candidate) {
+        foreach ($this->getDefeatedCandidates() as $candidate) {
             $candidates['defeated'][] = $candidate->getId();
         }
 
