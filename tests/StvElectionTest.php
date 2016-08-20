@@ -123,4 +123,30 @@ class StvElectionTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(1, $collections['ballots'][0]->getRanking()[1]);
         $this->assertNotContains(4, $collections['ballots'][0]->getRanking());
     }
+
+    public function testElectionFactory()
+    {
+        $candidates = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+        $ballots = StvBallotTest::getBallotArrays();
+        $election = ElectionFactory::createElection($candidates, $ballots, 4, true);
+        $this->assertInstanceOf(Election::class, $election);
+        $this->assertCount(15, $election->getCandidates());
+        $this->assertCount(41, $election->getBallots());
+        $this->assertEquals(4, $election->getWinnersCount());
+        unset($candidates, $ballots, $elections);
+
+        $candidates = ['Gibbs', 'Vance', 'Dinozzo', 'McGee', 'Abby', 'Ducky'];
+
+        $rankings = [];
+        $rankings[] = ['Gibbs', 'Vance', 'Dinozzo'];
+        $rankings[] = ['Ducky', 'McGee', 'Abby', 'Vance','Gibbs'];
+        $rankings[] = ['Abby', 'Dinozzo', 'McGee', 'Gibbs', 'Vance', 'Ducky'];
+        $election = ElectionFactory::createElection($candidates, $rankings, 2, false);
+        $this->assertInstanceOf(Election::class, $election);
+        $this->assertCount(6, $election->getCandidates());
+        $this->assertCount(3, $election->getBallots());
+        $this->assertEquals(2, $election->getWinnersCount());
+
+        return $election;
+    }
 }

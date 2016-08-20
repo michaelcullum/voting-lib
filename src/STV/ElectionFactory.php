@@ -57,14 +57,14 @@ class ElectionFactory
 	public static function createElection(array $candidates, array $rankings, int $winnerCount, bool $ids = true): Election
 	{
 		if ($ids) {
-			$candidateCollection = self::createCandidateSet($candidates);
-			$ballotCollection = self::createBallotCollection($rankings);
+			$candidates = self::createCandidateCollection($candidates);
+			$ballots = self::createBallotCollection($rankings);
 		} else {
 			$collections = self::createCandidateBallotCollection($candidates, $rankings);
 			$candidates = $collections['candidates'];
 			$ballots = $collections['ballots'];
 		}
 
-		return new Election($winnerCount, $candidates, $ballots);
+		return new Election($candidates, $ballots, $winnerCount);
 	}
 }
