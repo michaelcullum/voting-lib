@@ -520,7 +520,7 @@ class ElectionRunner
      */
     public function setQuota(): int
     {
-        $this->quota = floor(
+        $this->quota = (int) floor(
             ($this->validBallots /
                 ($this->election->getWinnersCount() + 1)
             ) // p. 47 (1)
