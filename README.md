@@ -1,7 +1,7 @@
 # Voting Library
 
 Currently this library just contains the code for an STV election following rules
-similar to that of (Scottish STV)[http://www.legislation.gov.uk/sdsi/2011/9780111014639/pdfs/sdsi_9780111014639_en.pdf].
+similar to that of [Scottish STV](http://www.legislation.gov.uk/sdsi/2011/9780111014639/pdfs/sdsi_9780111014639_en.pdf).
 
 Documentation and stuff doesn't quite exist, and most of the STV working is done in
 `ElectionRunner.php`. References are provided throughout the codebase in comments with explanations on what it's doing with paragraph references to Scottish STV rules.
@@ -22,5 +22,3 @@ Scrutinizer: [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/michaelcu
 Code Coverage: [![Code Coverage](https://scrutinizer-ci.com/g/michaelcullum/voting-lib/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/michaelcullum/voting-lib/?branch=master)
 
 Travis CI: [![Build Status](https://travis-ci.org/michaelcullum/voting-lib.svg?branch=master)](https://travis-ci.org/michaelcullum/voting-lib)
-
-Still a WIP so there are some TODO comments throughout
